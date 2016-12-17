@@ -2,6 +2,7 @@ const net = require('net')
 const ansi = require('./lib/ansi')
 const unic = require('./lib/unichars')
 const Pane = require('./lib/ui/Pane')
+const Text = require('./lib/ui/Text')
 
 const server = new net.Server(socket => {
   //console.log(socket.constructor.prototype)
@@ -22,13 +23,18 @@ const server = new net.Server(socket => {
   const p = new Pane()
   p.w = socketWidth
   p.h = socketHeight
-  p.drawFrame(socket)
 
   const p2 = new Pane()
+  p2.x = 7
+  p2.y = 5
   p2.w = 8
   p2.h = 3
   p.addChild(p2)
-  p2.drawFrame(socket)
+
+  const text = new Text('Hi')
+  p2.addChild(text)
+
+  p.drawTo(socket)
 })
 
 server.listen(8008)
