@@ -6,7 +6,8 @@ const Form =      require('../../lib/ui/form/Form')
 const TextInput = require('../../lib/ui/form/TextInput')
 const Button =    require('../../lib/ui/form/Button')
 
-const LoginDialog = require('./LoginDialog')
+const LoginDialog =  require('./LoginDialog')
+const SignupDialog = require('./SignupDialog')
 
 module.exports = class MainMenu extends FocusElement {
   constructor(game) {
@@ -26,9 +27,8 @@ module.exports = class MainMenu extends FocusElement {
     this.signupButton = new Button('Sign up')
     this.form.addInput(this.signupButton)
 
-    this.loginButton.on('pressed', () => {
-      this.handleLogInPressed()
-    })
+    this.loginButton.on('pressed', () => this.loginPressed())
+    this.signupButton.on('pressed', () => this.signupPressed())
   }
 
   fixLayout() {
@@ -49,9 +49,15 @@ module.exports = class MainMenu extends FocusElement {
     this.root.select(this.loginButton)
   }
 
-  handleLogInPressed(flushable) {
+  loginPressed() {
     const loginDialog = new LoginDialog(this.game)
     this.addChild(loginDialog)
     this.root.select(loginDialog)
+  }
+
+  signupPressed() {
+    const signupDialog = new SignupDialog(this.game)
+    this.addChild(signupDialog)
+    this.root.select(signupDialog)
   }
 }

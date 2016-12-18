@@ -8,7 +8,7 @@ const Form =      require('../../lib/ui/form/Form')
 const TextInput = require('../../lib/ui/form/TextInput')
 const Button =    require('../../lib/ui/form/Button')
 
-module.exports = class LoginDialog extends FocusElement {
+module.exports = class SignupDialog extends FocusElement {
   constructor(game) {
     super()
 
@@ -26,14 +26,11 @@ module.exports = class LoginDialog extends FocusElement {
     this.usernameInput = new TextInput()
     this.form.addInput(this.usernameInput)
 
-    this.loginButton = new Button('Log In')
-    this.form.addInput(this.loginButton)
+    this.signupButton = new Button('Sign up')
+    this.form.addInput(this.signupButton)
 
-    this.errorLabel = new Label()
-    this.errorLabel.color = ansi.C_RED
-    this.form.addChild(this.errorLabel)
-
-    this.loginButton.on('pressed', () => this.loginPressed())
+    this.signupStatus = new Label()
+    this.form.addChild(this.signupStatus)
   }
 
   fixLayout() {
@@ -54,30 +51,27 @@ module.exports = class LoginDialog extends FocusElement {
     this.usernameInput.y = this.usernameLabel.y
     this.usernameInput.w = this.form.contentW - this.usernameInput.x
 
-    this.loginButton.x = 0
-    this.loginButton.y = this.form.contentH - 1
+    this.signupButton.x = 0
+    this.signupButton.y = this.form.contentH - 1
 
-    this.errorLabel.x = this.loginButton.text.length + 1
-    this.errorLabel.y = this.loginButton.y
+    this.signupStatus.x = this.signupButton.text.length + 1
+    this.signupStatus.y = this.signupButton.y
+
+    this.signupButton.on('pressed', () => this.signupPressed())
   }
 
   focus() {
     this.root.select(this.usernameInput)
   }
 
-  loginPressed() {
-    this.errorLabel.text = ''
-
-    this.game.login(this.usernameInput.value)
+  signupPressed() {
+    this.game.signup(this.usernameInput.value)
       .then(user => {
-        console.log(user)
+        this.signupStatus.text = 'Signed up!'
+        this.signupStatus.textColor = ansi.C_GREEN
       })
       .catch(err => {
-        if (err.code === 'ENOUSERFOUND') {
-          this.errorLabel.text = 'No user found!'
-        } else {
-          throw err
-        }
+        console.log(err)
       })
   }
 }

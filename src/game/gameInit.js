@@ -12,9 +12,11 @@ function loadDatabase(db) {
 }
 
 module.exports = function gameInit(conf) {
-  return loadDatabase(new Datastore({filename: conf.dbPath})).then(db => {
+  return loadDatabase(new Datastore({
+    filename: `${conf.dbPath}/users.db`
+  })).then(userDB => {
     const game = new Game()
-    game.db = db
+    game.userDB = userDB
 
     return game
   })
