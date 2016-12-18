@@ -9,8 +9,10 @@ const Button =    require('../../lib/ui/form/Button')
 const LoginDialog = require('./LoginDialog')
 
 module.exports = class MainMenu extends FocusElement {
-  constructor() {
+  constructor(game) {
     super()
+
+    this.game = game
 
     this.pane = new Pane()
     this.addChild(this.pane)
@@ -48,7 +50,7 @@ module.exports = class MainMenu extends FocusElement {
   }
 
   handleLogInPressed(flushable) {
-    const loginDialog = new LoginDialog()
+    const loginDialog = new LoginDialog(this.game)
     this.addChild(loginDialog)
     this.root.select(loginDialog)
   }

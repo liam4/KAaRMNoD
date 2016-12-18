@@ -1,3 +1,5 @@
+const ansi = require('../../lib/ansi')
+
 const FocusElement = require('../../lib/ui/form/FocusElement')
 
 const Pane =      require('../../lib/ui/Pane')
@@ -7,8 +9,10 @@ const TextInput = require('../../lib/ui/form/TextInput')
 const Button =    require('../../lib/ui/form/Button')
 
 module.exports = class LoginDialog extends FocusElement {
-  constructor() {
+  constructor(game) {
     super()
+
+    this.game = game
 
     this.pane = new Pane()
     this.root.addChild(this.pane)
@@ -25,8 +29,22 @@ module.exports = class LoginDialog extends FocusElement {
     this.loginButton = new Button('Log In')
     this.form.addInput(this.loginButton)
 
+    this.errorLabel = new Label()
+    this.errorLabel.color = ansi.C_RED
+    this.form.addChild(this.errorLabel)
+
     this.loginButton.on('pressed', () => {
-      console.log('Log in!?')
+      this.game.login(this.usernameInput.value)
+        .then(user => {
+          console.log(user)
+        })
+        .catch(err => {
+          if (err.code === 'ENOUSERFOUND') {
+            this.errorLabel.text = 'No user found!'
+          } else {
+            throw err
+          }
+        })
     })
   }
 
@@ -50,6 +68,9 @@ module.exports = class LoginDialog extends FocusElement {
 
     this.loginButton.x = 0
     this.loginButton.y = this.form.contentH - 1
+
+    this.errorLabel.x = this.loginButton.text.length + 1
+    this.errorLabel.y = this.loginButton.y
   }
 
   focus() {
