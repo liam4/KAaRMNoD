@@ -38,8 +38,13 @@ module.exports = class DisplayObject extends EventEmitter {
     this.drawChildrenTo(writable)
   }
 
+  fixLayout() {
+    // Adjusts the layout of children in this element. If your subclass has
+    // any children in it, you should override this method.
+  }
+
   drawChildrenTo(writable) {
-    // Draw all of the children to a writable.
+    // Draws all of the children to a writable.
 
     for (let child of this.children) {
       child.drawTo(writable)
@@ -52,6 +57,20 @@ module.exports = class DisplayObject extends EventEmitter {
 
     child.parent = this
     this.children.push(child)
+    child.fixLayout()
+  }
+
+  centerInParent() {
+    // Utility function to center this element in its parent. Must be called
+    // only when it has a parent. Set the width and height of the element
+    // before centering it!
+
+    if (this.parent === null) {
+      throw new Error('Cannot center in parent when parent is null')
+    }
+
+    this.x = Math.floor((this.parent.w - this.w) / 2)
+    this.y = Math.floor((this.parent.h - this.h) / 2)
   }
 
   get root() {

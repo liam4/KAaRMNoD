@@ -99,5 +99,12 @@ module.exports = class TextInput extends FocusElement {
     if (this.cursorIndex - this.scrollChars < 0) {
       this.scrollChars--
     }
+
+    // Scroll left, if we can see past the end of the text.
+    if (this.scrollChars > 0 && (
+      this.scrollChars + this.w - 3 > this.value.length)
+    ) {
+      this.scrollChars--
+    }
   }
 }

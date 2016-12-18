@@ -28,6 +28,15 @@ module.exports = class Pane extends DisplayElement {
     const top = this.absTop
     const bottom = this.absBottom
 
+    // Background
+    // (TODO) Transparent background (that dimmed everything behind it) would
+    // be cool at some point!
+    for (let y = top + 1; y <= bottom - 1; y++) {
+      writable.write(ansi.moveCursor(y, left))
+      writable.write(' '.repeat(this.w))
+    }
+
+    // Left/right edges
     for (let x = left + 1; x <= right - 1; x++) {
       writable.write(ansi.moveCursor(top, x))
       writable.write(unic.BOX_H)
@@ -35,6 +44,7 @@ module.exports = class Pane extends DisplayElement {
       writable.write(unic.BOX_H)
     }
 
+    // Top/bottom edges
     for (let y = top + 1; y <= bottom - 1; y++) {
       writable.write(ansi.moveCursor(y, left))
       writable.write(unic.BOX_V)

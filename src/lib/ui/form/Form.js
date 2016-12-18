@@ -17,6 +17,11 @@ module.exports = class Form extends FocusElement {
 
   handleKeyPressed(keyBuf) {
     if (keyBuf[0] === 0x09) {
+      // No inputs to tab through, so do nothing.
+      if (this.inputs.length < 2) {
+        return
+      }
+
       const nextInput = this.inputs[
         (this.inputs.indexOf(this.root.selected) + 1) %
         this.inputs.length
