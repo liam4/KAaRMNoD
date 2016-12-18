@@ -10,10 +10,11 @@ const Flushable = require('../lib/Flushable')
 const Root =      require('../lib/ui/Root')
 
 const MainMenu =  require('./ui/MainMenu')
+const Home =      require('./ui/Home')
 
 module.exports = class Game {
   constructor() {
-    this.db = null
+    this.userDB = null
   }
 
   handleConnection(socket) {
@@ -25,11 +26,15 @@ module.exports = class Game {
     const root = new Root(socket)
     root.w = 80
     root.h = 24
-    this.root = root
 
-    const mainMenu = new MainMenu(this)
-    root.addChild(mainMenu)
-    root.select(mainMenu)
+    // const mainMenu = new MainMenu(this)
+    // root.addChild(mainMenu)
+    // root.select(mainMenu)
+
+    const home = new Home()
+    root.addChild(home)
+    root.select(home)
+    root.fixAllLayout()
 
     const flushInterval = setInterval(() => {
       root.drawTo(flushable)

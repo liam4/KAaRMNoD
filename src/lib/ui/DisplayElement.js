@@ -43,6 +43,15 @@ module.exports = class DisplayObject extends EventEmitter {
     // any children in it, you should override this method.
   }
 
+  fixAllLayout() {
+    // Runs fixLayout on this as well as all children.
+
+    this.fixLayout()
+    for (let child of this.children) {
+      child.fixAllLayout()
+    }
+  }
+
   drawChildrenTo(writable) {
     // Draws all of the children to a writable.
 
