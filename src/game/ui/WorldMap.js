@@ -15,7 +15,14 @@ module.exports = class WorldMap extends FocusElement {
       {x: 2, y: 0},
       {x: 0, y: 1},
       {x: 1, y: 1},
-      {x: 2, y: 1},
+      {x: 2, y: 1, texture: [
+        '~~~~~~~~~~',
+        '~+------+~',
+        '~|~.!!.~|~',
+        '~|~.!!.~|~',
+        '~+------+~',
+        '~~~~~~~~~~'
+      ]},
       {x: 0, y: 2},
       {x: 1, y: 2},
       {x: 2, y: 2}
@@ -53,16 +60,39 @@ module.exports = class WorldMap extends FocusElement {
         writable.write(ansi.invert())
       }
 
-      for (let y = tile.y * th; y < (tile.y + 1) * th; y++) {
-        const line = this.absTop + y - Math.round(this.scrollY)
-        if (line < this.absTop || line > this.absBottom) continue
+      if (!tile.texture) {
+        // OLD
+        for (let y = tile.y * th; y < (tile.y + 1) * th; y++) {
+          const line = this.absTop + y - Math.round(this.scrollY)
+          if (line < this.absTop || line > this.absBottom) continue
 
-        for (let x = tile.x * tw; x < (tile.x + 1) * tw; x++) {
-          const col = this.absLeft + x + Math.round(this.scrollX)
-          if (col < this.absLeft || col > this.absRight) continue
+          for (let x = tile.x * tw; x < (tile.x + 1) * tw; x++) {
+            const col = this.absLeft + x + Math.round(this.scrollX)
+            if (col < this.absLeft || col > this.absRight) continue
 
-          writable.write(ansi.moveCursor(line, col))
-          writable.write('~')
+            writable.write(ansi.moveCursor(line, col))
+            writable.write('~')
+          }
+        }
+      } else {
+        for (let texLine = 0; texLine < th; texLine++) {
+          const line = (
+            this.absTop + (tile.y * th) + texLine - Math.round(this.scrollY)
+          )
+
+          if (line < this.absTop || line > this.absBottom) continue
+
+          for (let texCol = 0; texCol < tw; texCol++) {
+            const col = (
+              this.absLeft + (tile.x * tw) + texCol +
+              Math.round(this.scrollX)
+            )
+
+            if (col < this.absLeft || col > this.absRight) continue
+
+            writable.write(ansi.moveCursor(line, col))
+            writable.write(tile.texture[texLine][texCol])
+          }
         }
       }
 
