@@ -20,7 +20,7 @@ module.exports = class Game {
   handleConnection(socket) {
     console.log('')
 
-    const flushable = new Flushable(socket, true)
+    const flushable = new Flushable(socket, false)
 
     flushable.write(ansi.clearScreen())
     flushable.flush()
@@ -29,13 +29,13 @@ module.exports = class Game {
     root.w = 80
     root.h = 24
 
-    const mainMenu = new MainMenu(this)
-    root.addChild(mainMenu)
-    root.select(mainMenu)
+    // const mainMenu = new MainMenu(this)
+    // root.addChild(mainMenu)
+    // root.select(mainMenu)
 
-    // const home = new Home()
-    // root.addChild(home)
-    // root.select(home)
+    const home = new Home()
+    root.addChild(home)
+    root.select(home)
 
     root.fixAllLayout()
 

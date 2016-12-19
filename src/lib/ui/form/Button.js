@@ -14,6 +14,17 @@ module.exports = class ButtonInput extends FocusElement {
     this.cursorY = null
   }
 
+  // Setting the text of the button should change the width of the button to
+  // fit the text.
+  set text(newText) {
+    this._text = newText
+    this.w = newText.length
+  }
+
+  get text() {
+    return this._text
+  }
+
   drawTo(writable) {
     if (this.isSelected) {
       writable.write(ansi.invert())

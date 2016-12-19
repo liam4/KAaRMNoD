@@ -7,12 +7,16 @@ module.exports = class Form extends FocusElement {
     this.inputs = []
   }
 
-  addInput(input) {
+  addInput(input, asChild = true) {
     // Adds the given input as a child element and pushes it to the input
-    // list.
+    // list. If the second optional, asChild, is false, it won't add the
+    // input element as a child of the form.
 
     this.inputs.push(input)
-    this.addChild(input)
+
+    if (asChild) {
+      this.addChild(input)
+    }
   }
 
   handleKeyPressed(keyBuf) {
