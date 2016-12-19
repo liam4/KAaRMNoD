@@ -42,7 +42,7 @@ module.exports = class Root extends DisplayElement {
       const els = this.selected.directAncestors.concat([this.selected])
       for (let el of els) {
         if (el instanceof FocusElement) {
-          const shouldBreak = (el.handleKeyPressed(buffer) === false)
+          const shouldBreak = (el.keyPressed(buffer) === false)
           if (shouldBreak) {
             break
           }

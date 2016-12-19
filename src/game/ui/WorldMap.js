@@ -75,7 +75,7 @@ module.exports = class WorldMap extends FocusElement {
     this.scrollY += (this.scrollTargetY - this.scrollY) / 3
   }
 
-  handleKeyPressed(keyBuf) {
+  keyPressed(keyBuf) {
     if (keyBuf[0] === 0x1b) {
       if (keyBuf[2] === 0x44) {
         this.scrollTargetX += this.tileWidth

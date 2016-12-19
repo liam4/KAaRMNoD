@@ -45,7 +45,7 @@ module.exports = class TextInput extends FocusElement {
     super.drawTo(writable)
   }
 
-  handleKeyPressed(keyBuf) {
+  keyPressed(keyBuf) {
     if (keyBuf[0] === 127) {
       this.value = (
         this.value.slice(0, this.cursorIndex - 1) +

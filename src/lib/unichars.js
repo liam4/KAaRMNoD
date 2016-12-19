@@ -1,3 +1,5 @@
+// Useful Unicode characters.
+
 module.exports = {
   ELLIPSIS: '\u2026',
 

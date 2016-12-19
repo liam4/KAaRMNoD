@@ -1,3 +1,5 @@
+const telc = require('../../lib/telchars')
+
 const Form = require('../../lib/ui/form/Form')
 
 const HorizontalBox = require('../../lib/ui/HorizontalBox')
@@ -35,6 +37,15 @@ module.exports = class BuildingTools extends Form {
 
   initEventListeners() {
     this.cancelBtn.on('pressed', () => this.cancelPressed())
+  }
+
+  keyPressed(keyBuf) {
+    if (telc.isCancel(keyBuf)) {
+      this.emit('cancelled')
+      return
+    }
+
+    super.keyPressed(keyBuf)
   }
 
   cancelPressed() {

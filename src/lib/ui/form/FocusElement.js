@@ -22,7 +22,7 @@ module.exports = class FocusElement extends DisplayElement {
     this.isSelected = false
   }
 
-  handleKeyPressed(keyBuf) {
+  keyPressed(keyBuf) {
     // Do something with a buffer containing the key pressed (that is,
     // telnet data sent). Should be overridden in subclasses.
     //

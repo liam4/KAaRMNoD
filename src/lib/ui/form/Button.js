@@ -1,4 +1,5 @@
 const ansi = require('../../ansi')
+const telc = require('../../telchars')
 
 const FocusElement = require('./FocusElement')
 
@@ -38,8 +39,8 @@ module.exports = class ButtonInput extends FocusElement {
     super.drawTo(writable)
   }
 
-  handleKeyPressed(keyBuf) {
-    if (keyBuf[0] === 0x20 || (keyBuf[0] === 0x0d && keyBuf[1] === 0x00)) {
+  keyPressed(keyBuf) {
+    if (telc.isSelect(keyBuf)) {
       this.emit('pressed')
     }
   }
