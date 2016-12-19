@@ -52,9 +52,11 @@ module.exports = class Root extends DisplayElement {
   drawTo(writable) {
     writable.write(ansi.moveCursor(0, 0))
     writable.write(' '.repeat(this.w * this.h))
+  }
 
-    super.drawTo(writable)
-
+  didRenderTo(writable) {
+    // Render the cursor, based on the cursorX and cursorY of the currently
+    // selected element.
     if (
       this.selected &&
       typeof this.selected.cursorX === 'number' &&

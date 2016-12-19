@@ -29,18 +29,19 @@ module.exports = class Game {
     root.w = 80
     root.h = 24
 
-    // const mainMenu = new MainMenu(this)
-    // root.addChild(mainMenu)
-    // root.select(mainMenu)
+    const mainMenu = new MainMenu(this)
+    root.addChild(mainMenu)
+    root.select(mainMenu)
 
-    const home = new Home()
-    root.addChild(home)
-    root.select(home)
+    // const home = new Home()
+    // root.addChild(home)
+    // root.select(home)
+
     root.fixAllLayout()
 
     const flushInterval = setInterval(() => {
     // const flushInterval = setTimeout(() => {
-      root.drawTo(flushable)
+      root.renderTo(flushable)
       flushable.flush()
     }, 100)
 

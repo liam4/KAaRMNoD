@@ -8,11 +8,17 @@ module.exports = class Home extends FocusElement {
   constructor() {
     super()
 
+    this.kingdomBuildings = [
+      {x: 2, y: 1}
+    ]
+
     this.worldMapPane = new Pane()
     this.addChild(this.worldMapPane)
 
     this.worldMap = new WorldMap()
     this.worldMapPane.addChild(this.worldMap)
+
+    this.worldMap.on('tileselected', t => this.tileSelected(t))
 
     this.rightPane = new Pane()
     this.addChild(this.rightPane)
@@ -33,5 +39,15 @@ module.exports = class Home extends FocusElement {
 
   focus() {
     this.root.select(this.worldMap)
+  }
+
+  tileSelected(t) {
+    console.log(t)
+
+    const selectedBuilding = this.kingdomBuildings.filter(
+      b => b.x === t.x && b.y === t.y)[0]
+
+    if (selectedBuilding) {
+    }
   }
 }

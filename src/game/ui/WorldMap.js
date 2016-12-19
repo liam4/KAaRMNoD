@@ -86,6 +86,8 @@ module.exports = class WorldMap extends FocusElement {
       } else if (keyBuf[2] === 0x42) {
         this.scrollTargetY += this.tileHeight
       }
+    } else if (keyBuf[0] === 0x20) {
+      this.emit('tileselected', this.selectedTile)
     }
   }
 

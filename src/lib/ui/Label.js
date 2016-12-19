@@ -17,10 +17,9 @@ module.exports = class Label extends DisplayElement {
     writable.write(ansi.setForeground(this.color))
     writable.write(ansi.moveCursor(this.absTop, this.absLeft))
     writable.write(this.text)
+    writable.write(ansi.setForeground(ansi.C_RESET))
 
     super.drawTo(writable)
-
-    writable.write(ansi.setForeground(ansi.C_RESET))
   }
 
   set text(newText) {

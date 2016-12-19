@@ -13,6 +13,8 @@ module.exports = class DisplayElement extends EventEmitter {
   constructor() {
     super()
 
+    this.visible = true
+
     this.parent = null
     this.children = []
 
@@ -23,19 +25,33 @@ module.exports = class DisplayElement extends EventEmitter {
 
     this.hPadding = 0
     this.vPadding = 0
-
-    this.lastDrawnTarget = null
   }
 
   drawTo(writable) {
     // Writes text to a "writable" - an object that has a "write" method.
     // Custom rendering should be handled as an override of this method in
-    // subclasses of DisplayObject. (This method does do other various
-    // rendering things to be convenient, though, so use super.drawTo() at
-    // the end of your override.)
+    // subclasses of DisplayElement.
+  }
 
-    this.lastDrawnTarget = writable
-    this.drawChildrenTo(writable)
+  renderTo(writable) {
+    // Like drawTo, but only calls drawTo if the element is visible. Use this
+    // with your root element, not drawTo.
+
+    if (this.visible) {
+      this.drawTo(writable)
+      this.drawChildrenTo(writable)
+      this.didRenderTo(writable)
+    }
+  }
+
+  didRenderTo(writable) {
+    // Called immediately after rendering this element AND all of its
+    // children. If you need to do something when that happens, override this
+    // method in your subclass.
+    //
+    // It's fine to draw more things to the writable here - just keep in mind
+    // that it'll be drawn over this element and its children, but not any
+    // elements drawn in the future.
   }
 
   fixLayout() {
@@ -56,7 +72,7 @@ module.exports = class DisplayElement extends EventEmitter {
     // Draws all of the children to a writable.
 
     for (let child of this.children) {
-      child.drawTo(writable)
+      child.renderTo(writable)
     }
   }
 
