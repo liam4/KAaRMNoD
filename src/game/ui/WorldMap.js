@@ -66,16 +66,17 @@ module.exports = class WorldMap extends FocusElement {
         }
       }
 
-      writable.write(ansi.resetAttributes())
+      if (tile === selected) {
+        writable.write(ansi.resetAttributes())
+      }
     }
 
-    this.scrollX += (this.scrollTargetX - this.scrollX) / 5
-    this.scrollY += (this.scrollTargetY - this.scrollY) / 5
+    this.scrollX += (this.scrollTargetX - this.scrollX) / 3
+    this.scrollY += (this.scrollTargetY - this.scrollY) / 3
   }
 
   handleKeyPressed(keyBuf) {
-    if (keyBuf[0] === 0x1b && keyBuf[1] === 0x5b) {
-      // Keyboard scrolling
+    if (keyBuf[0] === 0x1b) {
       if (keyBuf[2] === 0x44) {
         this.scrollTargetX += this.tileWidth
       } else if (keyBuf[2] === 0x43) {

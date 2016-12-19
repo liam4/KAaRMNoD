@@ -18,7 +18,9 @@ module.exports = class Game {
   }
 
   handleConnection(socket) {
-    const flushable = new Flushable(socket)
+    console.log('')
+
+    const flushable = new Flushable(socket, true)
 
     flushable.write(ansi.clearScreen())
     flushable.flush()
@@ -37,9 +39,10 @@ module.exports = class Game {
     root.fixAllLayout()
 
     const flushInterval = setInterval(() => {
+    // const flushInterval = setTimeout(() => {
       root.drawTo(flushable)
       flushable.flush()
-    }, 20)
+    }, 100)
 
     socket.on('end', () => clearInterval(flushInterval))
 

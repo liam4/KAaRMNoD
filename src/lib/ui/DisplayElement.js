@@ -1,6 +1,6 @@
 const EventEmitter = require('events')
 
-module.exports = class DisplayObject extends EventEmitter {
+module.exports = class DisplayElement extends EventEmitter {
   // A general class that handles dealing with screen coordinates, the tree
   // of elements, and other common stuff.
   //
