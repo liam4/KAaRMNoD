@@ -28,6 +28,8 @@ module.exports = class Root extends DisplayElement {
       255, 250, 34, 1, 0, 255, 240,  // IAC SB LINEMODE MODE 0 IAC SE
       255, 251, 1    // IAC WILL ECHO
     ]))
+
+    this.socket.write(ansi.hideCursor())
   }
 
   handleData(buffer) {

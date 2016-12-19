@@ -9,6 +9,8 @@ module.exports = class Home extends FocusElement {
   constructor() {
     super()
 
+    console.log('connection :D')
+
     this.kingdomBuildings = [
       {x: 2, y: 1}
     ]
@@ -26,10 +28,15 @@ module.exports = class Home extends FocusElement {
     this.buildingTools = new BuildingTools()
     this.buildingToolsPane.addChild(this.buildingTools)
 
-    this.worldMap.on('tileselected', t => this.tileSelected(t))
-
     this.rightPane = new Pane()
     this.addChild(this.rightPane)
+
+    this.initEventListeners()
+  }
+
+  initEventListeners() {
+    this.worldMap.on('tileselected', t => this.tileSelected(t))
+    this.buildingTools.on('cancelled', () => this.buildingToolsCancelled())
   }
 
   fixLayout() {
@@ -45,9 +52,6 @@ module.exports = class Home extends FocusElement {
       this.buildingToolsPane.x = this.worldMapPane.x
       this.buildingToolsPane.y = this.worldMapPane.bottom
       this.buildingToolsPane.w = this.worldMapPane.w
-
-      this.buildingToolsPane.fixAllLayout()
-      this.worldMapPane.fixAllLayout()
     } else {
       this.worldMapPane.h = this.contentH
     }
@@ -70,9 +74,15 @@ module.exports = class Home extends FocusElement {
 
     if (selectedBuilding) {
       this.buildingToolsPane.visible = true
-      this.fixLayout()
+      this.fixAllLayout()
 
       this.root.select(this.buildingTools)
     }
+  }
+
+  buildingToolsCancelled() {
+    this.buildingToolsPane.visible = false
+    this.root.select(this.worldMap)
+    this.fixAllLayout()
   }
 }

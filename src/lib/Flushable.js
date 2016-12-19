@@ -34,11 +34,13 @@ module.exports = class Flushable {
     // TODO: customize screen size
     const screen = ansi.interpret(toWrite, 24, 80)
 
+    /*
     const pcSaved = Math.round(100 - (100 / toWrite.length * screen.length))
     console.log(
       '\x1b[1A' +
       `${toWrite.length} - ${screen.length} ${pcSaved}% saved   `
     )
+    */
 
     return screen
   }

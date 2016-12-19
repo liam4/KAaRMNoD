@@ -38,6 +38,18 @@ const ansi = {
     return `${ESC}[${line + 1};${col + 1}H`
   },
 
+  hideCursor() {
+    // Makes the cursor invisible.
+
+    return `${ESC}[?25l`
+  },
+
+  showCursor() {
+    // Makes the cursor visible.
+
+    return `${ESC}[?25h`
+  },
+
   resetAttributes() {
     // Resets all attributes, including text decorations, foreground and
     // background color.

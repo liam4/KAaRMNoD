@@ -29,9 +29,17 @@ module.exports = class BuildingTools extends Form {
     this.sellBtn = new Button('Sell')
     this.addInput(this.sellBtn, false)
     this.horizontalBox.addChild(this.sellBtn)
+
+    this.initEventListeners()
   }
 
-  fixLayout() {}
+  initEventListeners() {
+    this.cancelBtn.on('pressed', () => this.cancelPressed())
+  }
+
+  cancelPressed() {
+    this.emit('cancelled')
+  }
 
   focus() {
     this.root.select(this.useBtn)
