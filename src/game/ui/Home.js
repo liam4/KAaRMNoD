@@ -1,3 +1,5 @@
+const unic = require('../../lib/unichars')
+
 const FocusElement = require('../../lib/ui/form/FocusElement')
 
 const Pane = require('../../lib/ui/Pane')
@@ -12,13 +14,14 @@ module.exports = class Home extends FocusElement {
     console.log('connection :D')
 
     this.kingdomBuildings = [
-      {x: 2, y: 1}
+      // {x: 2, y: 1}
     ]
 
     this.worldMapPane = new Pane()
     this.addChild(this.worldMapPane)
 
     this.worldMap = new WorldMap()
+    this.worldMap.tiles = this.buildWorldMapTiles()
     this.worldMapPane.addChild(this.worldMap)
 
     this.buildingToolsPane = new Pane()
@@ -78,6 +81,74 @@ module.exports = class Home extends FocusElement {
 
       this.root.select(this.buildingTools)
     }
+  }
+
+  buildWorldMapTiles() {
+    const tiles = []
+
+    const buildingSpaceSize = 5;
+
+    // building space tiles
+    for (let y = 0; y < buildingSpaceSize; y++) {
+      for (let x = 0; x < buildingSpaceSize; x++) {
+        tiles.push({
+          x: x, y: y,
+          texture: [
+            '..........',
+            '..........',
+            '..........',
+            '..........',
+            '..........',
+            '..........'
+          ]
+        })
+      }
+    }
+
+    // building space horizontal (south) wall
+    for (let x = 0; x < buildingSpaceSize; x++) {
+      tiles.push({
+        x: x, y: buildingSpaceSize,
+        texture: [
+          '..........',
+          '══════════',
+          '──────────',
+          '──────────',
+          '══════════',
+          '..........'
+        ]
+      })
+    }
+
+    // building space vertical (east) wall
+    for (let y = 0; y < buildingSpaceSize; y++) {
+      tiles.push({
+        x: buildingSpaceSize, y: y,
+        texture: [
+          '.║ │  │ ║.',
+          '.║ │  │ ║.',
+          '.║ │  │ ║.',
+          '.║ │  │ ║.',
+          '.║ │  │ ║.',
+          '.║ │  │ ║.'
+        ]
+      })
+    }
+
+    // building space wall corner (southeast)
+    tiles.push({
+      x: buildingSpaceSize, y: buildingSpaceSize,
+      texture: [
+        '.║ │  │ ║.',
+        '═╝ │  │ ║.',
+        '───┘  │ ║.',
+        '──────┘ ║.',
+        '════════╝.',
+        '..........'
+      ]
+    })
+
+    return tiles
   }
 
   buildingToolsCancelled() {
