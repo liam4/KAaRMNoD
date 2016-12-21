@@ -5,6 +5,7 @@ module.exports = class Form extends FocusElement {
     super()
 
     this.inputs = []
+    this.curIndex = 0
   }
 
   addInput(input, asChild = true) {
@@ -26,12 +27,16 @@ module.exports = class Form extends FocusElement {
         return
       }
 
-      const nextInput = this.inputs[
-        (this.inputs.indexOf(this.root.selected) + 1) %
-        this.inputs.length
-      ]
+      this.curIndex = (this.curIndex + 1) % this.inputs.length
+
+      const nextInput = this.inputs[this.curIndex]
       this.root.select(nextInput)
+
       return false
     }
+  }
+  
+  focus() {
+    this.root.select(this.inputs[this.curIndex])
   }
 }

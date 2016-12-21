@@ -27,8 +27,23 @@ module.exports = class MainMenu extends FocusElement {
     this.signupButton = new Button('Sign up')
     this.form.addInput(this.signupButton)
 
+    this.loginDialog = new LoginDialog(this.game)
+    this.loginDialog.visible = false
+    this.addChild(this.loginDialog)
+
+    this.signupDialog = new SignupDialog(this.game)
+    this.signupDialog.visible = false
+    this.addChild(this.signupDialog)
+
+    this.initEventListeners()
+  }
+
+  initEventListeners() {
     this.loginButton.on('pressed', () => this.loginPressed())
     this.signupButton.on('pressed', () => this.signupPressed())
+    this.loginDialog.on('loggedin', user => this.loggedInAs(user))
+    this.loginDialog.on('cancelled', () => this.loginCancelled())
+    this.signupDialog.on('cancelled', () => this.signupCancelled())
   }
 
   fixLayout() {
@@ -46,18 +61,32 @@ module.exports = class MainMenu extends FocusElement {
   }
 
   focus() {
-    this.root.select(this.loginButton)
+    this.root.select(this.form)
   }
 
   loginPressed() {
-    const loginDialog = new LoginDialog(this.game)
-    this.addChild(loginDialog)
-    this.root.select(loginDialog)
+    this.loginDialog.visible = true
+    this.root.select(this.loginDialog)
   }
 
   signupPressed() {
-    const signupDialog = new SignupDialog(this.game)
-    this.addChild(signupDialog)
-    this.root.select(signupDialog)
+    this.signupDialog.visible = true
+    this.root.select(this.signupDialog)
+  }
+
+  loggedInAs(user) {
+    this.loginDialog.visible = false
+
+    this.emit('loggedin', user)
+  }
+
+  loginCancelled() {
+    this.loginDialog.visible = false
+    this.root.select(this)
+  }
+
+  signupCancelled() {
+    this.signupDialog.visible = false
+    this.root.select(this.form)
   }
 }

@@ -1,4 +1,5 @@
 const ansi = require('../../lib/ansi')
+const telc = require('../../lib/telchars')
 
 const FocusElement = require('../../lib/ui/form/FocusElement')
 
@@ -69,9 +70,16 @@ module.exports = class SignupDialog extends FocusElement {
       .then(user => {
         this.signupStatus.text = 'Signed up!'
         this.signupStatus.textColor = ansi.C_GREEN
+        user.saveAll()
       })
       .catch(err => {
         console.log(err)
       })
+  }
+
+  keyPressed(keyBuf) {
+    if (telc.isCancel(keyBuf)) {
+      this.emit('cancelled')
+    }
   }
 }

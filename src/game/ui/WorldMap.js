@@ -1,4 +1,5 @@
 const ansi = require('../../lib/ansi')
+const telc = require('../../lib/telchars')
 
 const FocusElement = require('../../lib/ui/form/FocusElement')
 
@@ -75,6 +76,11 @@ module.exports = class WorldMap extends FocusElement {
           }
         }
       } else {
+
+        if (tile.textureAttributes) {
+          writable.write(ansi.setAttributes(tile.textureAttributes))
+        }
+
         for (let texLine = 0; texLine < th; texLine++) {
           const line = (
             this.absTop + (tile.y * th) + texLine - Math.round(this.scrollY)
@@ -93,6 +99,10 @@ module.exports = class WorldMap extends FocusElement {
             writable.write(ansi.moveCursor(line, col))
             writable.write(tile.texture[texLine][texCol])
           }
+        }
+
+        if (tile.textureAttributes) {
+          writable.write(ansi.setAttributes([ansi.A_RESET]))
         }
       }
 
@@ -116,7 +126,7 @@ module.exports = class WorldMap extends FocusElement {
       } else if (keyBuf[2] === 0x42) {
         this.scrollTargetY += this.tileHeight
       }
-    } else if (keyBuf[0] === 0x20) {
+    } else if (telc.isSelect(keyBuf)) {
       this.emit('tileselected', this.selectedTile)
     }
   }
@@ -137,5 +147,29 @@ module.exports = class WorldMap extends FocusElement {
     } else {
       return null
     }
+  }
+
+  setTileAt(x, y, tile) {
+    // Places the given tile at the given position. Replaces whatever tile is
+    // already there, if there is one.
+
+    const oldTile = this.getTileAt(x, y)
+
+    if (oldTile) {
+      this.tiles.splice(this.tiles.indexOf(oldTile), 1)
+    }
+
+    tile.x = x
+    tile.y = y
+
+    this.tiles.push(tile)
+  }
+
+  getTileAt(x, y) {
+    // Gets the tile at the given position. Returns null if there is none.
+
+    const tile = this.tiles.filter(t => t.x === x && t.y === y)[0]
+
+    return tile ? tile : null
   }
 }

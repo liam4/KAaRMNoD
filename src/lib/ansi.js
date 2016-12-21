@@ -5,15 +5,18 @@ const isDigit = char => '0123456789'.indexOf(char) >= 0
 const ansi = {
   ESC,
 
-  C_BLACK:   0,
-  C_RED:     1,
-  C_GREEN:   2,
-  C_YELLOW:  3,
-  C_BLUE:    4,
-  C_MAGENTA: 5,
-  C_CYAN:    6,
-  C_WHITE:   7,
-  C_RESET:   9,
+  // Attributes
+  A_RESET:    0,
+  A_DIM:      2,
+  C_BLACK:   30,
+  C_RED:     31,
+  C_GREEN:   32,
+  C_YELLOW:  33,
+  C_BLUE:    34,
+  C_MAGENTA: 35,
+  C_CYAN:    36,
+  C_WHITE:   37,
+  C_RESET:   39,
 
   clearScreen() {
     // Clears the screen, removing any characters displayed, and resets the
@@ -57,6 +60,14 @@ const ansi = {
     return `${ESC}[0m`
   },
 
+  setAttributes(attrs) {
+    // Set some raw attributes. See the attributes section of the ansi.js
+    // source code for attributes that can be used with this; A_RESET resets
+    // all attributes.
+
+    return `${ESC}[${attrs.join(';')}m`
+  },
+
   setForeground(color) {
     // Sets the foreground color to print text with. See C_(COLOR) for colors
     // that can be used with this; C_RESET resets the foreground.
@@ -68,7 +79,7 @@ const ansi = {
       return ''
     }
 
-    return `${ESC}[3${color}m`
+    return ansi.setAttributes([color])
   },
 
   invert() {
@@ -152,13 +163,12 @@ const ansi = {
 
         // SGR - Select Graphic Rendition
         if (text[charI] === 'm') {
-          while (args[0]) {
-            if (args[0] === '0') {
+          for (let arg of args) {
+            if (arg === '0') {
               attributes.splice(0, attributes.length)
             } else {
-              attributes.push(args[0])
+              attributes.push(arg)
             }
-            args.shift()
           }
         }
 
@@ -167,10 +177,11 @@ const ansi = {
 
       // debug
       /*
-      if (text[charI] !== ' ') {
+      if (text[charI] === '.') {
         console.log(
           `#1-char "${text[charI]}" at ` +
-          `(${cursorRow},${cursorCol}):${getCursorIndex()}\n`
+          `(${cursorRow},${cursorCol}):${getCursorIndex()} ` +
+          ` attr:[${attributes.join(';')}]`
         )
       }
       */
@@ -217,7 +228,7 @@ const ansi = {
         //   `removed some attributes "${char.char}"`, removedAttributes
         // )
         result.push(ansi.resetAttributes())
-        result.push(`${ESC}[${attributes.join(';')}m`)
+        result.push(`${ESC}[${char.attributes.join(';')}m`)
       } else if (newAttributes.length) {
         result.push(`${ESC}[${newAttributes.join(';')}m`)
       }

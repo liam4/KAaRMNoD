@@ -7,10 +7,11 @@ const exception = require('../lib/exception')
 const ansi =      require('../lib/ansi')
 const Flushable = require('../lib/Flushable')
 
+const User = require('./User')
+
 const Root =      require('../lib/ui/Root')
 
-const MainMenu =  require('./ui/MainMenu')
-const Home =      require('./ui/Home')
+const GameElement = require('./ui/GameElement')
 
 module.exports = class Game {
   constructor() {
@@ -29,15 +30,10 @@ module.exports = class Game {
     root.w = 80
     root.h = 24
 
-    // const mainMenu = new MainMenu(this)
-    // root.addChild(mainMenu)
-    // root.select(mainMenu)
-
-    const home = new Home()
-    root.addChild(home)
-    root.select(home)
-
+    const gameElement = new GameElement(this)
+    root.addChild(gameElement)
     root.fixAllLayout()
+    gameElement.run()
 
     const flushInterval = setInterval(() => {
     // const flushInterval = setTimeout(() => {
@@ -46,10 +42,6 @@ module.exports = class Game {
     }, 100)
 
     socket.on('end', () => clearInterval(flushInterval))
-
-    // this.dbInsert([{a: 5}, {a: 42}]).catch(err => {
-    //   console.log(err)
-    // })
   }
 
   login(username) {
@@ -59,7 +51,7 @@ module.exports = class Game {
     return this.dbFind(this.userDB, {'username': String(username)})
       .then(docs => {
         if (docs.length > 0) {
-          return docs[0]
+          return User.fromDBDocument(docs[0], this)
         }
 
         throw exception('ENOUSERFOUND', `No user with name ${username} found`)
@@ -70,9 +62,7 @@ module.exports = class Game {
     // Sign up as the given username. Returns the new user object.
 
     return this.dbInsert(this.userDB, {'username': String(username)})
-      .then(docs => {
-        return docs[0]
-      })
+      .then(doc => User.fromDBDocument(doc, this))
   }
 
   dbFind(db, ...args) {
@@ -81,5 +71,9 @@ module.exports = class Game {
 
   dbInsert(db, ...args) {
     return promisifyMethod(db, 'insert')(...args)
+  }
+
+  dbUpdate(db, ...args) {
+    return promisifyMethod(db, 'update')(...args)
   }
 }

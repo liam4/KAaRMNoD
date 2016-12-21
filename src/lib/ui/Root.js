@@ -30,6 +30,11 @@ module.exports = class Root extends DisplayElement {
     ]))
 
     this.socket.write(ansi.hideCursor())
+
+    // Cheats and resizes the (x)terminal. Please be nice and don't steal
+    // this code and spam it at someone with varying values :) Also it
+    // doesn't work in fullscreen Terminal.app, so..
+    this.socket.write('\x1b[8;24;80t')
   }
 
   handleData(buffer) {

@@ -1,4 +1,5 @@
 const ansi = require('../../lib/ansi')
+const telc = require('../../lib/telchars')
 
 const FocusElement = require('../../lib/ui/form/FocusElement')
 
@@ -70,7 +71,7 @@ module.exports = class LoginDialog extends FocusElement {
 
     this.game.login(this.usernameInput.value)
       .then(user => {
-        console.log(user)
+        this.emit('loggedin', user)
       })
       .catch(err => {
         if (err.code === 'ENOUSERFOUND') {
@@ -79,5 +80,11 @@ module.exports = class LoginDialog extends FocusElement {
           throw err
         }
       })
+  }
+
+  keyPressed(keyBuf) {
+    if (telc.isCancel(keyBuf)) {
+      this.emit('cancelled')
+    }
   }
 }

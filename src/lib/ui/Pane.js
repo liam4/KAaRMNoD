@@ -3,6 +3,8 @@ const unic = require('../unichars')
 
 const DisplayElement = require('./DisplayElement')
 
+const Label = require('./Label')
+
 module.exports = class Pane extends DisplayElement {
   // A simple rectangular framed pane.
 
@@ -76,5 +78,24 @@ module.exports = class Pane extends DisplayElement {
     }
 
     writable.write(ansi.setForeground(ansi.C_RESET))
+  }
+
+  static alert(parent, text) {
+    // Show an alert pane in the bottom left of the given parent element for
+    // a couple seconds.
+
+    const pane = new Pane()
+    pane.frameColor = ansi.C_WHITE
+    pane.w = text.length + 2
+    pane.h = 3
+    parent.addChild(pane)
+
+    const label = new Label(text)
+    label.color = ansi.C_WHITE
+    pane.addChild(label)
+
+    setTimeout(() => {
+      parent.removeChild(pane)
+    }, 2000)
   }
 }

@@ -1,5 +1,6 @@
 const ansi = require('../../ansi')
 const unic = require('../../unichars')
+const telc = require('../../telchars')
 
 const FocusElement = require('./FocusElement')
 
@@ -64,7 +65,10 @@ module.exports = class TextInput extends FocusElement {
         this.cursorIndex++
         this.root.cursorMoved()
       }
-    } else {
+    } else if (telc.isEscape(keyBuf)) {
+      // ESC is bad and we don't want that in the text input!
+      return
+    } else  {
       // console.log(keyBuf, keyBuf[0], keyBuf[1], keyBuf[2])
       this.value = (
         this.value.slice(0, this.cursorIndex) + keyBuf.toString() +

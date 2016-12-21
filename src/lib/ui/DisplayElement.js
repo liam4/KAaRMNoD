@@ -1,4 +1,5 @@
 const EventEmitter = require('events')
+const exception = require('../exception')
 
 module.exports = class DisplayElement extends EventEmitter {
   // A general class that handles dealing with screen coordinates, the tree
@@ -80,9 +81,28 @@ module.exports = class DisplayElement extends EventEmitter {
     // TODO Don't let a direct ancestor of this be added as a child. Don't
     // let itself be one of its childs either!
 
+    if (child === this) {
+      throw exception(
+        'EINVALIDHIERARCHY', 'An element cannot be a child of itself')
+    }
+
     child.parent = this
     this.children.push(child)
     child.fixLayout()
+  }
+
+  removeChild(child) {
+    // Removes the given child element from the children list of this
+    // element. It won't be rendered in the future. If the given element
+    // isn't a direct child of this element, nothing will happen.
+
+    if (child.parent !== this) {
+      return
+    }
+
+    child.parent = null
+    this.children.splice(this.children.indexOf(child), 1)
+    this.fixLayout()
   }
 
   centerInParent() {
