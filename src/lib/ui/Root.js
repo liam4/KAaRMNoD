@@ -37,6 +37,13 @@ module.exports = class Root extends DisplayElement {
     this.socket.write('\x1b[8;24;80t')
   }
 
+  cleanTelnetOptions() {
+    // Resets the telnet options and magic set in initTelnetOptions.
+
+    this.socket.write(ansi.resetAttributes())
+    this.socket.write(ansi.showCursor())
+  }
+
   handleData(buffer) {
     if (buffer[0] === 255) {
       // Telnet IAC (Is A Command) - ignore

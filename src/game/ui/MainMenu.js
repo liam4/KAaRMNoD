@@ -35,6 +35,14 @@ module.exports = class MainMenu extends FocusElement {
     this.signupDialog.visible = false
     this.addChild(this.signupDialog)
 
+    this.label1 = new Label('Press TAB to move through the UI.')
+    this.label2 = new Label('Press SPACE/ENTER to select something.')
+    this.label3 = new Label('Press ^Q to quit.')
+
+    this.addChild(this.label1)
+    this.addChild(this.label2)
+    this.addChild(this.label3)
+
     this.initEventListeners()
   }
 
@@ -56,6 +64,14 @@ module.exports = class MainMenu extends FocusElement {
 
     this.form.w = this.pane.contentW
     this.form.h = this.pane.contentH
+
+    this.label1.x = Math.floor((this.contentW - this.label1.w) / 2)
+    this.label2.x = Math.floor((this.contentW - this.label2.w) / 2)
+    this.label3.x = Math.floor((this.contentW - this.label3.w) / 2)
+
+    this.label1.y = this.pane.top - 5
+    this.label2.y = this.label1.y + 1
+    this.label3.y = this.label2.y + 1
 
     this.signupButton.x = this.pane.contentW - this.signupButton.text.length
   }

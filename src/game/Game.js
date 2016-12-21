@@ -19,7 +19,7 @@ module.exports = class Game {
   }
 
   handleConnection(socket) {
-    console.log('')
+    console.log('Connection gotten.')
 
     const flushable = new Flushable(socket, true)
 
@@ -30,7 +30,7 @@ module.exports = class Game {
     root.w = 80
     root.h = 24
 
-    const gameElement = new GameElement(this)
+    const gameElement = new GameElement(this, socket)
     root.addChild(gameElement)
     root.fixAllLayout()
     gameElement.run()
