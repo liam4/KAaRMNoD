@@ -27,21 +27,26 @@ module.exports = class Game {
     flushable.flush()
 
     const root = new Root(socket)
-    root.w = 80
-    root.h = 24
 
-    const gameElement = new GameElement(this, socket)
-    root.addChild(gameElement)
-    root.fixAllLayout()
-    gameElement.run()
+    root.requestTelnetWindowSize().then(({lines, cols}) => {
+      root.w = cols
+      root.h = lines
+      flushable.screenLines = lines
+      flushable.screenCols = cols
 
-    const flushInterval = setInterval(() => {
-    // const flushInterval = setTimeout(() => {
-      root.renderTo(flushable)
-      flushable.flush()
-    }, 100)
+      const gameElement = new GameElement(this, flushable)
+      root.addChild(gameElement)
+      root.fixAllLayout()
+      gameElement.run()
 
-    socket.on('end', () => clearInterval(flushInterval))
+      const flushInterval = setInterval(() => {
+      // const flushInterval = setTimeout(() => {
+        root.renderTo(flushable)
+        flushable.flush()
+      }, 100)
+
+      socket.on('end', () => clearInterval(flushInterval))
+    })
   }
 
   login(username) {

@@ -68,7 +68,7 @@ module.exports = class TextInput extends FocusElement {
     } else if (telc.isEscape(keyBuf)) {
       // ESC is bad and we don't want that in the text input!
       return
-    } else  {
+    } else {
       // console.log(keyBuf, keyBuf[0], keyBuf[1], keyBuf[2])
       this.value = (
         this.value.slice(0, this.cursorIndex) + keyBuf.toString() +

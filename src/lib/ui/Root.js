@@ -30,11 +30,6 @@ module.exports = class Root extends DisplayElement {
     ]))
 
     this.socket.write(ansi.hideCursor())
-
-    // Cheats and resizes the (x)terminal. Please be nice and don't steal
-    // this code and spam it at someone with varying values :) Also it
-    // doesn't work in fullscreen Terminal.app, so..
-    this.socket.write('\x1b[8;24;80t')
   }
 
   cleanTelnetOptions() {
@@ -44,9 +39,47 @@ module.exports = class Root extends DisplayElement {
     this.socket.write(ansi.showCursor())
   }
 
+  requestTelnetWindowSize() {
+    // See RFC #1073 - Telnet Window Size Option
+
+    return new Promise((res, rej) => {
+      this.socket.write(Buffer.from([
+        255, 253, 31  // IAC WILL NAWS
+      ]))
+
+      this.once('telnetsub', function until(sub) {
+        if (sub[0] !== 31) { // NAWS
+          this.once('telnetsub', until)
+        } else {
+          res({lines: sub[4], cols: sub[2]})
+        }
+      })
+    })
+  }
+
   handleData(buffer) {
     if (buffer[0] === 255) {
       // Telnet IAC (Is A Command) - ignore
+
+      // Split the data into multiple IAC commands if more than one IAC was
+      // sent.
+      const values = Array.from(buffer.values())
+      const commands = []
+      const curCmd = [255]
+      for (let value of values) {
+        if (value === 255) { // IAC
+          commands.push(Array.from(curCmd))
+          curCmd.splice(1, curCmd.length)
+          continue
+        }
+        curCmd.push(value)
+      }
+      commands.push(curCmd)
+
+      for (let command of commands) {
+        this.interpretTelnetCommand(command)
+      }
+
       return
     }
 
@@ -60,6 +93,29 @@ module.exports = class Root extends DisplayElement {
           }
         }
       }
+    }
+  }
+
+  interpretTelnetCommand(command) {
+    if (command[0] !== 255) { // IAC
+      // First byte isn't IAC, which means this isn't a command, so do
+      // nothing.
+      return
+    }
+
+    if (command[1] === 251) { // WILL
+      // Do nothing because I'm lazy
+      const willWhat = command[2]
+      //console.log('IAC WILL ' + willWhat)
+    }
+
+    if (command[1] === 250) { // SB
+      this.telnetSub = command.slice(2)
+    }
+
+    if (command[1] === 240) { // SE
+      this.emit('telnetsub', this.telnetSub)
+      this.telnetSub = null
     }
   }
 

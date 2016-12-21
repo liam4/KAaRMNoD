@@ -9,11 +9,11 @@ module.exports = class GameElement extends FocusElement {
   // The game's main element control class. It also handles all interaction
   // for per-user things.
 
-  constructor(game, socket) {
+  constructor(game, flushable) {
     super()
 
     this.game = game
-    this.socket = socket
+    this.flushable = flushable
     this.user = null
 
     this.mainMenu = new MainMenu(this.game)
@@ -63,9 +63,7 @@ module.exports = class GameElement extends FocusElement {
   saveRequested() {
     // Called in Home when the combo ^S is pressed.
 
-    this.user.kingdomBuildings = Array.from(
-      this.home.kingdomBuildings)
-    this.user.saveAll()
+    this.saveUser()
   }
 
   quitRequested() {
@@ -73,14 +71,20 @@ module.exports = class GameElement extends FocusElement {
     // pressed.
 
     if (this.user) {
-      this.user.saveAll()
+      this.saveUser()
     }
 
     this.root.cleanTelnetOptions()
-    this.socket.write(ansi.clearScreen())
-    this.socket.write(ansi.moveCursor(0, 0))
-    this.socket.write('Goodbye!')
-    this.socket.write(ansi.moveCursor(1, 0))
-    this.socket.end()
+    this.flushable.target.write(ansi.clearScreen())
+    this.flushable.target.write(ansi.moveCursor(0, 0))
+    this.flushable.target.write('Goodbye!')
+    this.flushable.target.write(ansi.moveCursor(1, 0))
+    this.flushable.target.end()
+  }
+
+  saveUser() {
+    this.user.saveAll({
+      kingdomBuildings: this.home.kingdomBuildings
+    })
   }
 }

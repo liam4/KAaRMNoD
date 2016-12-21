@@ -11,6 +11,10 @@ module.exports = class Flushable {
     // doesn't *quite* work but should drastically decrease write size?
     this.shouldCompress = shouldCompress
 
+    // Update these if you plan on using the ANSI compressor!
+    this.screenLines = 24
+    this.screenCols = 80
+
     this.chunks = []
   }
 
@@ -32,7 +36,7 @@ module.exports = class Flushable {
 
   compress(toWrite) {
     // TODO: customize screen size
-    const screen = ansi.interpret(toWrite, 24, 80)
+    const screen = ansi.interpret(toWrite, this.screenLines, this.screenCols)
 
     /*
     const pcSaved = Math.round(100 - (100 / toWrite.length * screen.length))

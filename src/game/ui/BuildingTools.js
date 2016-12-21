@@ -4,10 +4,13 @@ const Form = require('../../lib/ui/form/Form')
 
 const HorizontalBox = require('../../lib/ui/HorizontalBox')
 const Button =        require('../../lib/ui/form/Button')
+const MoneyBuilding = require('../buildings/MoneyBuilding')
 
 module.exports = class BuildingTools extends Form {
   constructor() {
     super()
+
+    this.building = null
 
     this.horizontalBox = new HorizontalBox()
     this.addChild(this.horizontalBox)
@@ -36,7 +39,20 @@ module.exports = class BuildingTools extends Form {
   }
 
   initEventListeners() {
+    this.useBtn.on('pressed', () => this.usePressed())
     this.cancelBtn.on('pressed', () => this.cancelPressed())
+  }
+
+  loadBuilding(building) {
+    this.building = building
+
+    if (building instanceof MoneyBuilding) {
+      this.useBtn.text = `Collect (${building.moneyValueText})`
+    } else {
+      this.useBtn.text = 'Use'
+    }
+
+    this.fixLayout()
   }
 
   keyPressed(keyBuf) {
@@ -48,11 +64,16 @@ module.exports = class BuildingTools extends Form {
     super.keyPressed(keyBuf)
   }
 
+  usePressed() {
+    this.emit('usepressed')
+  }
+
   cancelPressed() {
     this.emit('cancelled')
   }
 
   focus() {
     this.root.select(this.useBtn)
+    this.curIndex = 0
   }
 }

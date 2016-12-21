@@ -9,6 +9,12 @@ const WorldMap =      require('./WorldMap')
 const BuildingTools = require('./BuildingTools')
 const Shop =          require('./Shop')
 
+// Buildings
+const MoneyBuilding =   require('../buildings/MoneyBuilding')
+const Fountain =        require('../buildings/Fountain')
+const TrainingGrounds = require('../buildings/TrainingGrounds')
+const Forgery =         require('../buildings/Forgery')
+
 module.exports = class Home extends FocusElement {
   constructor(user) {
     super()
@@ -48,6 +54,7 @@ module.exports = class Home extends FocusElement {
   initEventListeners() {
     this.worldMap.on('tileselected', t => this.tileSelected(t))
     this.buildingTools.on('cancelled', () => this.buildingToolsCancelled())
+    this.buildingTools.on('usepressed', () => this.buildingToolsUsePressed())
     this.shop.on('cancelled', () => this.shopCancelled())
     this.shop.on('itemselected', item => this.shopItemSelected(item))
   }
@@ -89,7 +96,15 @@ module.exports = class Home extends FocusElement {
 
     this.user = user
 
-    this.kingdomBuildings = this.user.kingdomBuildings
+    this.kingdomBuildings = this.user.kingdomBuildingDocs.map(doc => {
+      let bObj = this.makeBuildingFromType(doc.type)
+
+      if (bObj !== null) {
+        bObj.load(doc)
+      }
+
+      return bObj
+    }).filter(x => (x !== null))
 
     this.buildWorldMapTiles()
   }
@@ -113,6 +128,8 @@ module.exports = class Home extends FocusElement {
         b => b.x === t.x && b.y === t.y)[0]
 
       if (selectedBuilding) {
+        this.buildingTools.loadBuilding(selectedBuilding)
+
         this.buildingToolsPane.visible = true
         this.fixAllLayout()
 
@@ -143,9 +160,22 @@ module.exports = class Home extends FocusElement {
       for (let x = 0; x < buildingZoneSize; x++) {
         const tile = this.kingdomBuildings.filter(
           t => t.x === x && t.y === y)[0]
-        const type = tile ? tile.type : null
 
-        this.setBuildingAt(type, x, y)
+        if (tile) {
+          this.worldMap.setTileAt(x, y, tile)
+        } else {
+          this.worldMap.setTileAt(x, y, {
+            textureAttributes: [ansi.C_WHITE, ansi.A_DIM],
+            texture: [
+              '..........',
+              '..........',
+              '..........',
+              '..........',
+              '..........',
+              '..........'
+            ]
+          })
+        }
       }
     }
 
@@ -196,6 +226,24 @@ module.exports = class Home extends FocusElement {
   }
 
   buildingToolsCancelled() {
+    this.closeBuildingTools()
+  }
+
+  buildingToolsUsePressed() {
+    const { building } = this.buildingTools
+
+    if (building instanceof MoneyBuilding) {
+      const val = building.collectMoney()
+      this.user.gold += val
+
+      Pane.alert(this.root, `Collected ${val} gold!`)
+      this.emit('saverequested')
+    }
+
+    this.closeBuildingTools()
+  }
+
+  closeBuildingTools() {
     this.buildingToolsPane.visible = false
     this.root.select(this.worldMap)
     this.fixAllLayout()
@@ -213,79 +261,27 @@ module.exports = class Home extends FocusElement {
 
   shopItemSelected(item) {
     const {x, y} = this.worldMap.selectedTile
-    this.kingdomBuildings.push({x: x, y: y, type: item.title})
+
+    const bObj = this.makeBuildingFromType(item.title)
+    if (bObj) {
+      bObj.x = x
+      bObj.y = y
+      this.kingdomBuildings.push(bObj)
+      this.worldMap.setTileAt(x, y, bObj)
+    } else {
+      console.warn('Invalid building type from shop: ' + item.title)
+    }
 
     this.closeShopPane()
-
-    this.setBuildingAt(item.title, x, y)
   }
 
-  setBuildingAt(type, x, y) {
-    // Sets a building at the given position, using the correct texture,
-    // given the building type. If type is invalid the tile set will be red
-    // and a warning will be shown in the console; if type is null a blank
-    // "empty" tile will be set.
+  makeBuildingFromType(type) {
+    // Make a completely new building using the correct class, given a type.
+    // If there is no class for the given type, null is returned.
 
-    if (type === 'Fountain') {
-      this.setFountainTileAt(x, y)
-    } else if (type === 'Forgery') {
-      this.setForgeryTileAt(x, y)
-    } else if (type === 'Training Grounds') {
-      this.setTrainingGroundsTileAt(x, y)
-    } else {
-      this.worldMap.setTileAt(x, y, {
-        textureAttributes: [ansi.C_WHITE, ansi.A_DIM],
-        texture: [
-          '..........',
-          '..........',
-          '..........',
-          '..........',
-          '..........',
-          '..........'
-        ]
-      })
-    }
-  }
-
-  setFountainTileAt(x, y) {
-    this.worldMap.setTileAt(x, y, {
-      textureAttributes: [ansi.C_BLUE],
-      texture: [
-        '..........',
-        '.┌──────┐.',
-        '.│-*-*-*│.',
-        '.│*-*-*-│.',
-        '.└──────┘.',
-        '..........'
-      ]
-    })
-  }
-
-  setForgeryTileAt(x, y) {
-    this.worldMap.setTileAt(x, y, {
-      textureAttributes: [ansi.C_YELLOW],
-      texture: [
-        '┌────────┐',
-        '│||||||||│',
-        '│||||||||│',
-        '│||||||||│',
-        '│||||||||│',
-        '└────────┘'
-      ]
-    })
-  }
-
-  setTrainingGroundsTileAt(x, y) {
-    this.worldMap.setTileAt(x, y, {
-      textureAttributes: [ansi.C_YELLOW],
-      texture: [
-        '..........',
-        '.-~-~-~-~.',
-        '.~~~~~~~~.',
-        '.~~~~~~~~.',
-        '.~-~-~-~-.',
-        '..........'
-      ]
-    })
+    if (type === 'Fountain') return new Fountain()
+    else if (type === 'Training Grounds') return new TrainingGrounds()
+    else if (type === 'Forgery') return new Forgery()
+    else return null
   }
 }
