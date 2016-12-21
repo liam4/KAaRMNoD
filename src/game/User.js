@@ -9,19 +9,16 @@ module.exports = class User {
   }
 
   saveAll(obj) {
-    const doc = this.asDBDocument(obj)
+    const doc = this.save(obj)
 
     // console.log('Save:', doc)
 
-    this.game.dbUpdate(this.game.userDB,
-      {username: this.username}, doc)
+    this.game.dbUpdate(this.game.userDB, {username: this.username}, doc)
   }
 
-  asDBDocument({kingdomBuildings = []} = {}) {
-    // TODO: reimplement as 'save' as standardized in buildings
-
-    // Converts the user into a database document. Can be used on its own or
-    // via saveAll.
+  save({kingdomBuildings = []} = {}) {
+    // Use saveAll to write to the database! This just generates the object
+    // that would be written to the database.
 
     return {
       username: this.username,
@@ -30,15 +27,15 @@ module.exports = class User {
     }
   }
 
-  static fromDBDocument(doc, game) {
-    // TODO: reimplement as 'load' as standardized in buildings
+  load(doc) {
+    this.username = doc.username || 'Unnamed'
+    this.kingdomBuildingDocs = doc.kingdomBuildings || []
+    this.gold = doc.gold || 0
+  }
 
-    // Load from a database object/document.
-
+  static fromDocument(doc, game) {
     const user = new User(game)
-    user.username = doc.username || 'Unnamed'
-    user.kingdomBuildingDocs = doc.kingdomBuildings || []
-    user.gold = doc.gold || 0
+    user.load(doc)
     return user
   }
 }

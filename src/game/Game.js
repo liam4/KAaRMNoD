@@ -56,7 +56,7 @@ module.exports = class Game {
     return this.dbFind(this.userDB, {'username': String(username)})
       .then(docs => {
         if (docs.length > 0) {
-          return User.fromDBDocument(docs[0], this)
+          return User.fromDocument(docs[0], this)
         }
 
         throw exception('ENOUSERFOUND', `No user with name ${username} found`)
@@ -67,7 +67,7 @@ module.exports = class Game {
     // Sign up as the given username. Returns the new user object.
 
     return this.dbInsert(this.userDB, {'username': String(username)})
-      .then(doc => User.fromDBDocument(doc, this))
+      .then(doc => User.fromDocument(doc, this))
   }
 
   dbFind(db, ...args) {
