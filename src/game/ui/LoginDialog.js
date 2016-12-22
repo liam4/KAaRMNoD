@@ -31,7 +31,7 @@ module.exports = class LoginDialog extends FocusElement {
     this.form.addInput(this.loginButton)
 
     this.errorLabel = new Label()
-    this.errorLabel.color = ansi.C_RED
+    this.errorLabel.textAttributes = [ansi.C_RED]
     this.form.addChild(this.errorLabel)
 
     this.loginButton.on('pressed', () => this.loginPressed())

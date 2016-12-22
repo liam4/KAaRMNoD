@@ -91,7 +91,7 @@ module.exports = class Pane extends DisplayElement {
     parent.addChild(pane)
 
     const label = new Label(text)
-    label.color = ansi.C_WHITE
+    label.textAttributes = [ansi.C_WHITE]
     pane.addChild(label)
 
     setTimeout(() => {

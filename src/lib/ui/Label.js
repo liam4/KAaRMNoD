@@ -9,15 +9,20 @@ module.exports = class Label extends DisplayElement {
     super()
 
     this.text = text
-
-    this.color = null
+    this.textAttributes = []
   }
 
   drawTo(writable) {
-    writable.write(ansi.setForeground(this.color))
+    if (this.textAttributes.length) {
+      writable.write(ansi.setAttributes(this.textAttributes))
+    }
+
     writable.write(ansi.moveCursor(this.absTop, this.absLeft))
     writable.write(this.text)
-    writable.write(ansi.setForeground(ansi.C_RESET))
+
+    if (this.textAttributes.length) {
+      writable.write(ansi.resetAttributes())
+    }
 
     super.drawTo(writable)
   }

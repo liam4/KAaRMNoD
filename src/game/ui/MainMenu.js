@@ -1,3 +1,5 @@
+const ansi = require('../../lib/ansi')
+
 const FocusElement = require('../../lib/ui/form/FocusElement')
 
 const Pane =      require('../../lib/ui/Pane')
@@ -35,6 +37,17 @@ module.exports = class MainMenu extends FocusElement {
     this.signupDialog.visible = false
     this.addChild(this.signupDialog)
 
+    // K&ARMNOD(O) - Knights & A Relatively Minimal Number of Dragons Online
+    // "karm" "nod" "oh"
+    this.titleLabel = new Label(
+      'Knights & A Relatively Minimal Number of Dragons')
+    this.titleLabel.textAttributes = [ansi.C_CYAN, ansi.A_BRIGHT]
+    this.addChild(this.titleLabel)
+
+    this.subtitleLabel = new Label('- Online -')
+    this.subtitleLabel.textAttributes = [ansi.C_CYAN, ansi.A_DIM]
+    this.addChild(this.subtitleLabel)
+
     this.label1 = new Label('Press TAB to move through the UI.')
     this.label2 = new Label('Press SPACE/ENTER to select something.')
     this.label3 = new Label('Press ^Q to quit.')
@@ -65,11 +78,16 @@ module.exports = class MainMenu extends FocusElement {
     this.form.w = this.pane.contentW
     this.form.h = this.pane.contentH
 
+    this.titleLabel.x = Math.floor((this.contentW - this.titleLabel.w) / 2)
+    this.subtitleLabel.x = Math.floor(
+      (this.contentW - this.subtitleLabel.w) / 2)
     this.label1.x = Math.floor((this.contentW - this.label1.w) / 2)
     this.label2.x = Math.floor((this.contentW - this.label2.w) / 2)
     this.label3.x = Math.floor((this.contentW - this.label3.w) / 2)
 
-    this.label1.y = this.pane.top - 5
+    this.titleLabel.y = this.pane.top - 5
+    this.subtitleLabel.y = this.titleLabel.y + 1
+    this.label1.y = this.pane.top + 5
     this.label2.y = this.label1.y + 1
     this.label3.y = this.label2.y + 1
 

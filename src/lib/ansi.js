@@ -7,6 +7,7 @@ const ansi = {
 
   // Attributes
   A_RESET:    0,
+  A_BRIGHT:   1,
   A_DIM:      2,
   C_BLACK:   30,
   C_RED:     31,
