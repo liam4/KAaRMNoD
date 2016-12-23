@@ -47,6 +47,8 @@ module.exports = class Game {
 
       socket.on('end', () => clearInterval(flushInterval))
     })
+
+    socket.on('end', () => flushable.end())
   }
 
   login(username) {

@@ -15,6 +15,8 @@ module.exports = class Flushable {
     this.screenLines = 24
     this.screenCols = 80
 
+    this.ended = false
+
     this.chunks = []
   }
 
@@ -23,6 +25,11 @@ module.exports = class Flushable {
   }
 
   flush() {
+    // Don't write if we've ended.
+    if (this.ended) {
+      return
+    }
+
     let toWrite = this.chunks.join('')
 
     if (this.shouldCompress) {
@@ -32,6 +39,10 @@ module.exports = class Flushable {
     this.target.write(toWrite)
 
     this.chunks = []
+  }
+
+  end() {
+    this.ended = true
   }
 
   compress(toWrite) {

@@ -252,7 +252,7 @@ module.exports = class Home extends FocusElement {
       this.user.gold += val
 
       Pane.alert(this.root, `Collected ${val} gold!`)
-      this.emit('saverequested')
+      this.user.saveGold()
     }
 
     this.closeBuildingTools()
@@ -282,7 +282,8 @@ module.exports = class Home extends FocusElement {
       Pane.alert(this.root,
         `Sold ${building.title} for ${building.sellValue}G.`)
 
-      this.emit('saverequested')
+      this.user.saveGold()
+      this.user.saveBuildings(this.kingdomBuildings)
     })
   }
 
@@ -344,7 +345,9 @@ module.exports = class Home extends FocusElement {
 
       this.removeChild(dialog)
       this.closeShopPane()
-      this.emit('saverequested')
+
+      this.user.saveGold()
+      this.user.saveBuildings(this.kingdomBuildings)
     })
 
     dialog.on('cancelled', () => {

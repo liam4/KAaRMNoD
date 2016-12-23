@@ -13,6 +13,10 @@ module.exports = class User {
 
     // console.log('Save:', doc)
 
+    this.dbUpdate(doc)
+  }
+
+  dbUpdate(doc) {
     this.game.dbUpdate(this.game.userDB, {username: this.username}, doc)
   }
 
@@ -25,6 +29,26 @@ module.exports = class User {
       kingdomBuildings: kingdomBuildings.map(b => b.save()),
       gold: this.gold
     }
+  }
+
+  saveGold() {
+    // Saves the amount of gold the user has in the user database.
+
+    this.dbUpdate({
+      $set: {
+        gold: this.gold
+      }
+    })
+  }
+
+  saveBuildings(buildings) {
+    // TODO: Duplicate of code in save
+
+    this.dbUpdate({
+      $set: {
+        kingdomBuildings: buildings.map(b => b.save())
+      }
+    })
   }
 
   load(doc) {
