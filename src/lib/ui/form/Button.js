@@ -17,6 +17,8 @@ module.exports = class ButtonInput extends FocusElement {
 
   // Setting the text of the button should change the width of the button to
   // fit the text.
+  //
+  // TODO: Make this happen in fixLayout
   set text(newText) {
     this._text = newText
     this.w = newText.length

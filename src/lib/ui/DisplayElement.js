@@ -114,8 +114,8 @@ module.exports = class DisplayElement extends EventEmitter {
       throw new Error('Cannot center in parent when parent is null')
     }
 
-    this.x = Math.floor((this.parent.w - this.w) / 2)
-    this.y = Math.floor((this.parent.h - this.h) / 2)
+    this.x = Math.round((this.parent.contentW - this.w) / 2)
+    this.y = Math.round((this.parent.contentH - this.h) / 2)
   }
 
   get root() {

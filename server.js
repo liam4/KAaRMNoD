@@ -1,5 +1,8 @@
 const net = require('net')
 
+// TODO: remove this, because deprecation fun
+process.on('unhandledRejection', err => { throw err })
+
 require('./src/game/gameInit')({
   dbPath: __dirname + '/db'
 }).then(game => {

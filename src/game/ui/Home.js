@@ -1,19 +1,23 @@
-const unic = require('../../lib/unichars')
-const ansi = require('../../lib/ansi')
+const unic =            require('../../lib/unichars')
+const ansi =            require('../../lib/ansi')
+const buildingClasses = require('../buildings/buildingClasses')
 
 const FocusElement = require('../../lib/ui/form/FocusElement')
 
-const Pane = require('../../lib/ui/Pane')
-
+const Pane =          require('../../lib/ui/Pane')
+const UserPane =      require('./UserPane')
 const WorldMap =      require('./WorldMap')
 const BuildingTools = require('./BuildingTools')
 const Shop =          require('./Shop')
+const CancelDialog =  require('../../lib/ui/form/CancelDialog')
+const SellDialog =    require('./dialogs/SellDialog')
+const BuyDialog =     require('./dialogs/BuyDialog')
 
 // Buildings
 const MoneyBuilding =   require('../buildings/MoneyBuilding')
-const Fountain =        require('../buildings/Fountain')
-const TrainingGrounds = require('../buildings/TrainingGrounds')
-const Forgery =         require('../buildings/Forgery')
+// const Fountain =        require('../buildings/Fountain')
+// const TrainingGrounds = require('../buildings/TrainingGrounds')
+// const Forgery =         require('../buildings/Forgery')
 
 module.exports = class Home extends FocusElement {
   constructor(user) {
@@ -24,6 +28,11 @@ module.exports = class Home extends FocusElement {
     this.buildingZoneSize = 5
 
     this.kingdomBuildings = []
+
+    this.mapLayoutChanged = false
+
+    this.userPane = new UserPane()
+    this.addChild(this.userPane)
 
     this.worldMapPane = new Pane()
     this.addChild(this.worldMapPane)
@@ -38,12 +47,9 @@ module.exports = class Home extends FocusElement {
     this.buildingTools = new BuildingTools()
     this.buildingToolsPane.addChild(this.buildingTools)
 
-    this.rightPane = new Pane()
-    this.addChild(this.rightPane)
-
     this.shopPane = new Pane()
     this.shopPane.visible = false
-    this.addChild(this.shopPane)
+    this.worldMapPane.addChild(this.shopPane)
 
     this.shop = new Shop()
     this.shopPane.addChild(this.shop)
@@ -55,6 +61,8 @@ module.exports = class Home extends FocusElement {
     this.worldMap.on('tileselected', t => this.tileSelected(t))
     this.buildingTools.on('cancelled', () => this.buildingToolsCancelled())
     this.buildingTools.on('usepressed', () => this.buildingToolsUsePressed())
+    this.buildingTools.on('sellpressed',
+      () => this.buildingToolsSellPressed())
     this.shop.on('cancelled', () => this.shopCancelled())
     this.shop.on('itemselected', item => this.shopItemSelected(item))
   }
@@ -63,27 +71,27 @@ module.exports = class Home extends FocusElement {
     this.w = this.parent.contentW
     this.h = this.parent.contentH
 
-    this.worldMapPane.w = this.contentW - 12
+    this.userPane.w = this.contentW
+    this.userPane.h = 3
+    this.worldMapPane.w = this.contentW
+    this.worldMapPane.h = this.contentH - this.userPane.h
+    this.userPane.x = 0
+    this.userPane.y = this.worldMapPane.bottom
+
+    this.worldMap.w = this.worldMapPane.contentW
+    this.worldMap.h = this.worldMapPane.contentH
 
     if (this.buildingToolsPane.visible) {
       this.buildingToolsPane.h = 3
-      this.worldMapPane.h = this.contentH - this.buildingToolsPane.h
-
-      this.buildingToolsPane.x = this.worldMapPane.x
-      this.buildingToolsPane.y = this.worldMapPane.bottom
       this.buildingToolsPane.w = this.worldMapPane.w
-    } else {
-      this.worldMapPane.h = this.contentH
+      this.buildingToolsPane.x = this.worldMapPane.x
+      this.buildingToolsPane.y = (
+        this.worldMapPane.bottom - this.buildingToolsPane.h)
     }
 
-    this.rightPane.x = this.worldMapPane.right + 1
-    this.rightPane.y = 0
-    this.rightPane.w = this.contentW - this.rightPane.left
-    this.rightPane.h = this.contentH
-
     if (this.shopPane.visible) {
-      this.shopPane.w = this.contentW - 10
-      this.shopPane.h = this.contentH - 5
+      this.shopPane.w = this.shopPane.parent.contentW - 10
+      this.shopPane.h = this.shopPane.parent.contentH - 5
       this.shopPane.centerInParent()
 
       this.shop.w = this.shopPane.contentW
@@ -95,9 +103,10 @@ module.exports = class Home extends FocusElement {
     // Call this when the user is logged in.
 
     this.user = user
+    this.userPane.user = user
 
     this.kingdomBuildings = this.user.kingdomBuildingDocs.map(doc => {
-      let bObj = this.makeBuildingFromType(doc.type)
+      let bObj = this.makeBuildingFromTitle(doc.title)
 
       if (bObj !== null) {
         bObj.load(doc)
@@ -131,11 +140,13 @@ module.exports = class Home extends FocusElement {
         this.buildingTools.loadBuilding(selectedBuilding)
 
         this.buildingToolsPane.visible = true
+        this.mapLayoutChanged = true
         this.fixAllLayout()
 
         this.root.select(this.buildingTools)
       } else {
         this.shopPane.visible = true
+        this.shop.form.curIndex = 0
         this.fixAllLayout()
 
         this.root.select(this.shop)
@@ -164,17 +175,7 @@ module.exports = class Home extends FocusElement {
         if (tile) {
           this.worldMap.setTileAt(x, y, tile)
         } else {
-          this.worldMap.setTileAt(x, y, {
-            textureAttributes: [ansi.C_WHITE, ansi.A_DIM],
-            texture: [
-              '..........',
-              '..........',
-              '..........',
-              '..........',
-              '..........',
-              '..........'
-            ]
-          })
+          this.setBlankTileAt(x, y)
         }
       }
     }
@@ -225,6 +226,20 @@ module.exports = class Home extends FocusElement {
     })
   }
 
+  setBlankTileAt(x, y) {
+    this.worldMap.setTileAt(x, y, {
+      textureAttributes: [ansi.C_WHITE, ansi.A_DIM],
+      texture: [
+        '..........',
+        '..........',
+        '..........',
+        '..........',
+        '..........',
+        '..........'
+      ]
+    })
+  }
+
   buildingToolsCancelled() {
     this.closeBuildingTools()
   }
@@ -243,16 +258,45 @@ module.exports = class Home extends FocusElement {
     this.closeBuildingTools()
   }
 
+  buildingToolsSellPressed() {
+    const { building } = this.buildingTools
+
+    const dialog = new SellDialog(building)
+    this.worldMapPane.addChild(dialog)
+    this.root.select(dialog)
+
+    dialog.on('cancelled', () => {
+      this.worldMapPane.removeChild(dialog)
+      this.root.select(this.buildingTools)
+    })
+
+    dialog.on('confirmed', () => {
+      this.setBlankTileAt(building.x, building.y)
+      this.kingdomBuildings.splice(
+        this.kingdomBuildings.indexOf(building), 1)
+      this.worldMapPane.removeChild(dialog)
+      this.closeBuildingTools()
+
+      this.user.gold += building.sellValue
+
+      Pane.alert(this.root,
+        `Sold ${building.title} for ${building.sellValue}G.`)
+
+      this.emit('saverequested')
+    })
+  }
+
   closeBuildingTools() {
     this.buildingToolsPane.visible = false
-    this.root.select(this.worldMap)
+    this.mapLayoutChanged = true
     this.fixAllLayout()
+    this.root.select(this.worldMap)
   }
 
   closeShopPane() {
     this.shopPane.visible = false
-    this.root.select(this.worldMap)
     this.fixAllLayout()
+    this.root.select(this.worldMap)
   }
 
   shopCancelled() {
@@ -260,28 +304,56 @@ module.exports = class Home extends FocusElement {
   }
 
   shopItemSelected(item) {
-    const {x, y} = this.worldMap.selectedTile
+    const price = item.buildingClass.price
+    if (price > this.user.gold) {
+      const dialog = new CancelDialog(
+        `You need ${price - this.user.gold} more gold to buy` +
+        ` ${item.buildingClass.title}!`)
 
-    const bObj = this.makeBuildingFromType(item.title)
-    if (bObj) {
-      bObj.x = x
-      bObj.y = y
-      this.kingdomBuildings.push(bObj)
-      this.worldMap.setTileAt(x, y, bObj)
-    } else {
-      console.warn('Invalid building type from shop: ' + item.title)
+      this.addChild(dialog)
+      this.root.select(dialog)
+
+      dialog.on('cancelled', () => {
+        this.removeChild(dialog)
+        this.root.select(this.shop)
+      })
+
+      return
     }
 
-    this.closeShopPane()
+    const dialog = new BuyDialog(item.buildingClass)
+    this.addChild(dialog)
+    this.root.select(dialog)
+
+    dialog.on('confirmed', () => {
+      const {x, y} = this.worldMap.selectedTile
+
+      const bObj = new (item.buildingClass)
+      if (bObj) {
+        bObj.x = x
+        bObj.y = y
+        this.kingdomBuildings.push(bObj)
+        this.worldMap.setTileAt(x, y, bObj)
+      } else {
+        console.warn('Invalid building type from shop: ' + item.title)
+      }
+
+      this.removeChild(dialog)
+      this.closeShopPane()
+      this.emit('saverequested')
+    })
+
+    dialog.on('cancelled', () => {
+      this.removeChild(dialog)
+      this.root.select(this.shop)
+    })
   }
 
-  makeBuildingFromType(type) {
+  makeBuildingFromTitle(title) {
     // Make a completely new building using the correct class, given a type.
     // If there is no class for the given type, null is returned.
 
-    if (type === 'Fountain') return new Fountain()
-    else if (type === 'Training Grounds') return new TrainingGrounds()
-    else if (type === 'Forgery') return new Forgery()
-    else return null
+    const cls = buildingClasses.fromTitle(title)
+    return cls ? (new cls()) : null
   }
 }

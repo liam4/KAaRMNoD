@@ -29,6 +29,11 @@ module.exports = class Root extends DisplayElement {
       255, 251, 1    // IAC WILL ECHO
     ]))
 
+    // Will SGA. Helps with putty apparently.
+    this.socket.write(Buffer.from([
+      255, 251, 3  // IAC WILL SGA
+    ]))
+
     this.socket.write(ansi.hideCursor())
   }
 

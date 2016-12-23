@@ -1,4 +1,5 @@
 const telc = require('../../lib/telchars')
+const buildingClasses = require('../buildings/buildingClasses')
 
 const FocusElement = require('../../lib/ui/form/FocusElement')
 
@@ -35,8 +36,8 @@ module.exports = class Shop extends FocusElement {
   }
 
   buildShopItems() {
-    for (let itemTitle of ['Fountain', 'Training Grounds', 'Forgery']) {
-      const item = new ShopItem(itemTitle)
+    for (let buildingCls of buildingClasses) {
+      const item = new ShopItem(buildingCls)
       this.form.addInput(item)
       this.items.push(item)
 
@@ -45,7 +46,7 @@ module.exports = class Shop extends FocusElement {
   }
 
   focus() {
-    this.root.select(this.items[0])
+    this.root.select(this.form)
   }
 
   keyPressed(keyBuf) {

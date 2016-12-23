@@ -7,14 +7,24 @@ module.exports = class MoneyBuilding extends Building {
     super(type)
 
     this.lastCollectTime = Date.now()
+  }
 
-    // The rate at which money is gotten - this value per second.
-    this.moneyPerSecond = 1
-
+  // Static properties
+  static get moneyCap() {
     // The maximum amount of money this building can store at any single
     // time.
-    this.moneyCap = 150
+
+    return 150
   }
+
+  static get moneyPerSecond() {
+    // The rate at which money is gotten - this value per second.
+
+    return 1
+  }
+
+  get moneyCap() { return this.constructor.moneyCap }
+  get moneyPerSecond() { return this.constructor.moneyPerSecond }
 
   load(doc) {
     super.load(doc)

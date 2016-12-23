@@ -1,13 +1,13 @@
-const ansi = require('../../lib/ansi')
-const telc = require('../../lib/telchars')
+const ansi = require('../../../lib/ansi')
+const telc = require('../../../lib/telchars')
 
-const FocusElement = require('../../lib/ui/form/FocusElement')
+const FocusElement = require('../../../lib/ui/form/FocusElement')
 
-const Pane =      require('../../lib/ui/Pane')
-const Label =     require('../../lib/ui/Label')
-const Form =      require('../../lib/ui/form/Form')
-const TextInput = require('../../lib/ui/form/TextInput')
-const Button =    require('../../lib/ui/form/Button')
+const Pane =      require('../../../lib/ui/Pane')
+const Label =     require('../../../lib/ui/Label')
+const Form =      require('../../../lib/ui/form/Form')
+const TextInput = require('../../../lib/ui/form/TextInput')
+const Button =    require('../../../lib/ui/form/Button')
 
 module.exports = class SignupDialog extends FocusElement {
   constructor(game) {

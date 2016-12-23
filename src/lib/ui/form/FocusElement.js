@@ -8,6 +8,8 @@ module.exports = class FocusElement extends DisplayElement {
 
     this.cursorX = 0
     this.cursorY = 0
+
+    this.isSelected = false
   }
 
   focus(socket) {

@@ -8,8 +8,8 @@ const Form =      require('../../lib/ui/form/Form')
 const TextInput = require('../../lib/ui/form/TextInput')
 const Button =    require('../../lib/ui/form/Button')
 
-const LoginDialog =  require('./LoginDialog')
-const SignupDialog = require('./SignupDialog')
+const LoginDialog =  require('./dialogs/LoginDialog')
+const SignupDialog = require('./dialogs/SignupDialog')
 
 module.exports = class MainMenu extends FocusElement {
   constructor(game) {

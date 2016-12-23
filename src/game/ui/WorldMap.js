@@ -42,11 +42,6 @@ module.exports = class WorldMap extends FocusElement {
     this.scrollTargetY = 0
   }
 
-  fixLayout() {
-    this.w = this.parent.contentW
-    this.h = this.parent.contentH
-  }
-
   drawTo(writable) {
     super.drawTo(writable)
 
@@ -56,54 +51,36 @@ module.exports = class WorldMap extends FocusElement {
     const selected = this.selectedTile
 
     for (let tile of this.tiles) {
-
       if (tile === selected) {
         writable.write(ansi.invert())
       }
 
-      if (!tile.texture) {
-        // OLD
-        for (let y = tile.y * th; y < (tile.y + 1) * th; y++) {
-          const line = this.absTop + y - Math.round(this.scrollY)
-          if (line < this.absTop || line > this.absBottom) continue
+      if (tile.textureAttributes) {
+        writable.write(ansi.setAttributes(tile.textureAttributes))
+      }
 
-          for (let x = tile.x * tw; x < (tile.x + 1) * tw; x++) {
-            const col = this.absLeft + x + Math.round(this.scrollX)
-            if (col < this.absLeft || col > this.absRight) continue
+      for (let texLine = 0; texLine < th; texLine++) {
+        const line = (
+          this.absTop + (tile.y * th) + texLine - Math.round(this.scrollY)
+        )
 
-            writable.write(ansi.moveCursor(line, col))
-            writable.write('~')
-          }
-        }
-      } else {
+        if (line < this.absTop || line > this.absBottom) continue
 
-        if (tile.textureAttributes) {
-          writable.write(ansi.setAttributes(tile.textureAttributes))
-        }
-
-        for (let texLine = 0; texLine < th; texLine++) {
-          const line = (
-            this.absTop + (tile.y * th) + texLine - Math.round(this.scrollY)
+        for (let texCol = 0; texCol < tw; texCol++) {
+          const col = (
+            this.absLeft + (tile.x * tw) + texCol +
+            Math.round(this.scrollX)
           )
 
-          if (line < this.absTop || line > this.absBottom) continue
+          if (col < this.absLeft || col > this.absRight) continue
 
-          for (let texCol = 0; texCol < tw; texCol++) {
-            const col = (
-              this.absLeft + (tile.x * tw) + texCol +
-              Math.round(this.scrollX)
-            )
-
-            if (col < this.absLeft || col > this.absRight) continue
-
-            writable.write(ansi.moveCursor(line, col))
-            writable.write(tile.texture[texLine][texCol])
-          }
+          writable.write(ansi.moveCursor(line, col))
+          writable.write(tile.texture[texLine][texCol])
         }
+      }
 
-        if (tile.textureAttributes) {
-          writable.write(ansi.setAttributes([ansi.A_RESET]))
-        }
+      if (tile.textureAttributes) {
+        writable.write(ansi.setAttributes([ansi.A_RESET]))
       }
 
       if (tile === selected) {
