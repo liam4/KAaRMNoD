@@ -304,11 +304,12 @@ module.exports = class Home extends FocusElement {
   }
 
   shopItemSelected(item) {
-    const price = item.buildingClass.price
+    const cls = item.buildingClass
+    const price = cls.price
+
     if (price > this.user.gold) {
       const dialog = new CancelDialog(
-        `You need ${price - this.user.gold} more gold to buy` +
-        ` ${item.buildingClass.title}!`)
+        `You need ${price - this.user.gold} more gold to buy ${cls.title}!`)
 
       this.addChild(dialog)
       this.root.select(dialog)
@@ -321,14 +322,14 @@ module.exports = class Home extends FocusElement {
       return
     }
 
-    const dialog = new BuyDialog(item.buildingClass)
+    const dialog = new BuyDialog(cls)
     this.addChild(dialog)
     this.root.select(dialog)
 
     dialog.on('confirmed', () => {
       const {x, y} = this.worldMap.selectedTile
 
-      const bObj = new (item.buildingClass)
+      const bObj = new cls()
       if (bObj) {
         bObj.x = x
         bObj.y = y
@@ -337,6 +338,9 @@ module.exports = class Home extends FocusElement {
       } else {
         console.warn('Invalid building type from shop: ' + item.title)
       }
+
+      Pane.alert(this.root, `Bought ${cls.title} for ${price}G.`)
+      this.user.gold -= price
 
       this.removeChild(dialog)
       this.closeShopPane()
