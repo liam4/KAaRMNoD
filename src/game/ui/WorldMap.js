@@ -40,6 +40,8 @@ module.exports = class WorldMap extends FocusElement {
 
     this.scrollTargetX = 0
     this.scrollTargetY = 0
+
+    this.cursorStyle = 'nav'
   }
 
   drawTo(writable) {
@@ -52,10 +54,15 @@ module.exports = class WorldMap extends FocusElement {
 
     for (let tile of this.tiles) {
       if (tile === selected) {
-        writable.write(ansi.invert())
+        if (this.cursorStyle === 'nav') {
+          writable.write(ansi.invert())
+        }
       }
 
-      if (tile.textureAttributes) {
+      if (this.cursorStyle === 'pick' && tile === selected) {
+        writable.write(ansi.setAttributes([
+          ansi.C_CYAN, ansi.A_INVERT]))
+      } else if (tile.textureAttributes) {
         writable.write(ansi.setAttributes(tile.textureAttributes))
       }
 

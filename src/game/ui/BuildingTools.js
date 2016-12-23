@@ -41,6 +41,7 @@ module.exports = class BuildingTools extends Form {
   initEventListeners() {
     this.useBtn.on('pressed', () => this.usePressed())
     this.cancelBtn.on('pressed', () => this.cancelPressed())
+    this.moveBtn.on('pressed', () => this.movePressed())
     this.sellBtn.on('pressed', () => this.sellPressed())
   }
 
@@ -71,6 +72,10 @@ module.exports = class BuildingTools extends Form {
 
   cancelPressed() {
     this.emit('cancelled')
+  }
+
+  movePressed() {
+    this.emit('movepressed')
   }
 
   sellPressed() {

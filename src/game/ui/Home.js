@@ -1,4 +1,5 @@
 const unic =            require('../../lib/unichars')
+const telc =            require('../../lib/telchars')
 const ansi =            require('../../lib/ansi')
 const buildingClasses = require('../buildings/buildingClasses')
 
@@ -63,6 +64,8 @@ module.exports = class Home extends FocusElement {
     this.buildingTools.on('usepressed', () => this.buildingToolsUsePressed())
     this.buildingTools.on('sellpressed',
       () => this.buildingToolsSellPressed())
+    this.buildingTools.on('movepressed',
+      () => this.buildingToolsMovePressed())
     this.shop.on('cancelled', () => this.shopCancelled())
     this.shop.on('itemselected', item => this.shopItemSelected(item))
   }
@@ -130,7 +133,7 @@ module.exports = class Home extends FocusElement {
   }
 
   tileSelected(t) {
-    if (!t) return
+    if (!t || this.isMovingTile) return
 
     if (this.isTileInKingdom(t)) {
       const selectedBuilding = this.kingdomBuildings.filter(
@@ -256,6 +259,43 @@ module.exports = class Home extends FocusElement {
     }
 
     this.closeBuildingTools()
+  }
+
+  buildingToolsMovePressed() {
+    const { building } = this.buildingTools
+
+    this.buildingToolsPane.visible = false
+
+    this.isMovingTile = true
+
+    this.worldMap.cursorStyle = 'pick'
+
+    const done = () => {
+      this.worldMap.cursorStyle = 'nav'
+      this.worldMap.removeListener('keypressed', cb)
+      this.isMovingTile = false
+    }
+
+    const cb = keyBuf => {
+      if (telc.isCancel(keyBuf)) {
+        done()
+      }
+    }
+
+    this.worldMap.on('keypressed', cb)
+
+    this.worldMap.once('tileselected', tile => {
+      if (tile) {
+        this.setBlankTileAt(building.x, building.y)
+        this.worldMap.setTileAt(tile.x, tile.y, building)
+
+        done()
+
+        this.user.saveBuildings(this.kingdomBuildings)
+      }
+    })
+
+    this.root.select(this.worldMap)
   }
 
   buildingToolsSellPressed() {

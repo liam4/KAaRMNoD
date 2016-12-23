@@ -96,6 +96,7 @@ module.exports = class Root extends DisplayElement {
           if (shouldBreak) {
             break
           }
+          el.emit('keypressed', buffer)
         }
       }
     }
