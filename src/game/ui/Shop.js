@@ -3,8 +3,8 @@ const buildingClasses = require('../buildings/buildingClasses')
 
 const FocusElement = require('../../lib/ui/form/FocusElement')
 
-const Form     = require('../../lib/ui/form/Form')
-const ShopItem = require('./ShopItem')
+const ListScrollForm = require('../../lib/ui/form/ListScrollForm')
+const ShopItem =       require('./ShopItem')
 
 module.exports = class Shop extends FocusElement {
   constructor() {
@@ -15,7 +15,7 @@ module.exports = class Shop extends FocusElement {
 
     this.items = []
 
-    this.form = new Form()
+    this.form = new ListScrollForm()
     this.addChild(this.form)
 
     this.buildShopItems()
@@ -25,14 +25,12 @@ module.exports = class Shop extends FocusElement {
     this.form.w = this.contentW
     this.form.h = this.contentH
 
-    let nextY = 0
-    for (let item of this.items) {
-      item.x = 0
-      item.y = nextY
+    for (let item of this.items.slice(this.scrollItems)) {
       item.w = this.form.contentW
       item.h = 3
-      nextY += item.h
     }
+
+    this.form.fixLayout()
   }
 
   buildShopItems() {

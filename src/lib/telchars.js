@@ -3,6 +3,8 @@
 const telchars = {
   isSpace: buf => buf[0] === 0x20,
   isEnter: buf => buf[0] === 0x0d && buf[1] === 0x00,
+  isTab: buf => buf[0] === 0x09,
+  isBackTab: buf => buf[0] === 0x1b && buf[2] === 0x5A,
 
   // isEscape is hard because it's just send as ESC (the ANSI escape code),
   // so we need to make sure that the escape code is all on its own

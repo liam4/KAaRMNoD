@@ -1,3 +1,5 @@
+const telc = require('../../telchars')
+
 const FocusElement = require('./FocusElement')
 
 module.exports = class Form extends FocusElement {
@@ -21,13 +23,20 @@ module.exports = class Form extends FocusElement {
   }
 
   keyPressed(keyBuf) {
-    if (keyBuf[0] === 0x09) {
+    if (telc.isTab(keyBuf) || telc.isBackTab(keyBuf)) {
       // No inputs to tab through, so do nothing.
       if (this.inputs.length < 2) {
         return
       }
 
-      this.curIndex = (this.curIndex + 1) % this.inputs.length
+      if (telc.isTab(keyBuf)) {
+        this.curIndex = (this.curIndex + 1) % this.inputs.length
+      } else {
+        this.curIndex = (this.curIndex - 1)
+        if (this.curIndex < 0) {
+          this.curIndex = this.inputs.length
+        }
+      }
 
       const nextInput = this.inputs[this.curIndex]
       this.root.select(nextInput)
