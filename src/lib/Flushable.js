@@ -36,7 +36,12 @@ module.exports = class Flushable {
       toWrite = this.compress(toWrite)
     }
 
-    this.target.write(toWrite)
+    this.target.write(toWrite, err => {
+      if (err) {
+        console.error('Flushable write error (ending):', err.message)
+        this.end()
+      }
+    })
 
     this.chunks = []
   }
