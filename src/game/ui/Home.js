@@ -203,7 +203,7 @@ module.exports = class Home extends FocusElement {
     // Returns whether or not the given tile is within the kingdom building
     // zone.
 
-    return t.x < this.buildingZoneSize && t.y < this.buildingZoneSize
+    return t.x < 5 && t.y < 5
   }
 
   buildWorldMapTiles() {
