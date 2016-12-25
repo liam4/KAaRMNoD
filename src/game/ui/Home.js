@@ -13,12 +13,9 @@ const Shop =          require('./Shop')
 const CancelDialog =  require('../../lib/ui/form/CancelDialog')
 const SellDialog =    require('./dialogs/SellDialog')
 const BuyDialog =     require('./dialogs/BuyDialog')
+const DungeonDialog = require('./dialogs/DungeonDialog')
 
-// Buildings
 const MoneyBuilding =   require('../buildings/MoneyBuilding')
-// const Fountain =        require('../buildings/Fountain')
-// const TrainingGrounds = require('../buildings/TrainingGrounds')
-// const Forgery =         require('../buildings/Forgery')
 
 module.exports = class Home extends FocusElement {
   constructor(user) {
@@ -26,7 +23,26 @@ module.exports = class Home extends FocusElement {
 
     this.user = null
 
-    this.buildingZoneSize = 5
+    this.map = [
+      '......~~~~~~~~~~~',
+      '......~~~~~~~~~~~',
+      '......~~~~~~11~~~',
+      '......~~~~~~11~~~',
+      '......~~~~~~~~~~~',
+      '......~~~~~~~~~~~',
+      '~~~~~~~~~~~~~~~~~',
+    ]
+
+    this.dungeons = {
+      1: {
+        title: 'Relic Ruins',
+        description: (
+          'The large remnants of an old temple, Relic Ruins is now' +
+          ' infested by countless monsters attracted to the treasures that' +
+          ' lay in the rubble.'
+        )
+      }
+    }
 
     this.kingdomBuildings = []
 
@@ -155,6 +171,32 @@ module.exports = class Home extends FocusElement {
         this.root.select(this.shop)
       }
     }
+
+    const mapTile = this.map[t.y] && this.map[t.y][t.x]
+
+    if (mapTile === '1') {
+      // Dungeon #1, Relic Ruins
+
+      this.showDungeonDialog(1)
+    }
+  }
+
+  showDungeonDialog(id) {
+    const dialog = new DungeonDialog(this.dungeons[id])
+    this.worldMapPane.addChild(dialog)
+    this.root.select(dialog)
+
+    dialog.on('difficultyselected', () => {
+      this.worldMapPane.removeChild(dialog)
+
+      Pane.alert(this.root, 'Hehehehehe that doesn\'t work yet')
+      this.root.select(this.worldMap)
+    })
+
+    dialog.on('cancelled', () => {
+      this.worldMapPane.removeChild(dialog)
+      this.root.select(this.worldMap)
+    })
   }
 
   isTileInKingdom(t) {
@@ -165,9 +207,40 @@ module.exports = class Home extends FocusElement {
   }
 
   buildWorldMapTiles() {
-    const buildingZoneSize = this.buildingZoneSize;
+    this.buildWorldMapBasicTiles()
+    this.buildWorldMapKingdom()
+    this.buildWorldMapDungeons()
+  }
 
+  buildWorldMapBasicTiles() {
+    // The simple "tilesheet"-based tiles, as stored in home.map.
+
+    const map = this.map
+
+    for (let [y, row] of map.entries()) {
+      for (let [x, tileChar] of row.split('').entries()) {
+        if (tileChar === '.') {
+          this.setBlankTileAt(x, y)
+        } else if (tileChar === '~') {
+          this.worldMap.setTileAt(x, y, {
+            textureAttributes: [ansi.C_GREEN, ansi.A_DIM],
+            texture: [
+              '~~~~~~~~~~',
+              '~~~~~~~~~~',
+              '~~~~~~~~~~',
+              '~~~~~~~~~~',
+              '~~~~~~~~~~',
+              '~~~~~~~~~~'
+            ]
+          })
+        }
+      }
+    }
+  }
+
+  buildWorldMapKingdom() {
     const wallAttributes = [ansi.C_WHITE]
+    const buildingZoneSize = 5
 
     // building space tiles
     for (let y = 0; y < buildingZoneSize; y++) {
@@ -229,6 +302,62 @@ module.exports = class Home extends FocusElement {
     })
   }
 
+  buildWorldMapDungeons() {
+    // Build the various dungeon pictures on the world map.
+
+    // Dungeon 1 --- Relic Ruins
+    const d1X = 12
+    const d1Y = 2
+
+    this.worldMap.setTileAt(d1X, d1Y, {
+      textureAttributes: [ansi.C_YELLOW],
+      texture: [
+        '~~~~~~~~~~',
+        '~┌─┐~~~~~~',
+        '~│ └┐~~~~~',
+        '~└──┘═══┌─',
+        '.║...-..│ ',
+        '.│.*...┌┘ '
+      ]
+    })
+
+    this.worldMap.setTileAt(d1X + 1, d1Y, {
+      textureAttributes: [ansi.C_YELLOW],
+      texture: [
+        '~~~~~~~~~~',
+        '~~~~~~~~~~',
+        '~~~~~~~┌┐~',
+        '┐~....~││~',
+        '│═─.──═││~',
+        '│......└┘~'
+      ]
+    })
+
+    this.worldMap.setTileAt(d1X, d1Y + 1, {
+      textureAttributes: [ansi.C_YELLOW],
+      texture: [
+        '~......└═─',
+        '...**.....',
+        '~│......-.',
+        '~║.-┌─────',
+        '~┌──┘ ┌───',
+        '~└────┘~~~'
+      ]
+    })
+
+    this.worldMap.setTileAt(d1X + 1, d1Y + 1, {
+      textureAttributes: [ansi.C_YELLOW],
+      texture: [
+        '┘....-.~~~',
+        '..*...~~─~',
+        '...*....║~',
+        '─┐....~~~║',
+        '─┘~~~══~~~',
+        '~~~~~~─~~~'
+      ]
+    })
+  }
+
   setBlankTileAt(x, y) {
     this.worldMap.setTileAt(x, y, {
       textureAttributes: [ansi.C_WHITE, ansi.A_DIM],
@@ -272,20 +401,24 @@ module.exports = class Home extends FocusElement {
 
     const done = () => {
       this.worldMap.cursorStyle = 'nav'
-      this.worldMap.removeListener('keypressed', cb)
+      this.worldMap.removeListener('keypressed', keyCb)
+      this.worldMap.removeListener('tileselected', selectedCb)
       this.isMovingTile = false
     }
 
-    const cb = keyBuf => {
+    const keyCb = keyBuf => {
       if (telc.isCancel(keyBuf)) {
         done()
       }
     }
 
-    this.worldMap.on('keypressed', cb)
+    this.worldMap.on('keypressed', keyCb)
 
-    this.worldMap.once('tileselected', tile => {
-      if (tile) {
+    const selectedCb = tile => {
+      if (
+        tile && tile.x < this.buildingZoneSize &&
+        tile.y < this.buildingZoneSize
+      ) {
         this.setBlankTileAt(building.x, building.y)
         this.worldMap.setTileAt(tile.x, tile.y, building)
 
@@ -293,7 +426,9 @@ module.exports = class Home extends FocusElement {
 
         this.user.saveBuildings(this.kingdomBuildings)
       }
-    })
+    }
+
+    this.worldMap.on('tileselected', selectedCb)
 
     this.root.select(this.worldMap)
   }
