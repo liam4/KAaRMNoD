@@ -2,8 +2,9 @@ const ansi = require('../../lib/ansi')
 
 const FocusElement = require('../../lib/ui/form/FocusElement')
 
-const MainMenu =  require('./MainMenu')
 const Home =      require('./Home')
+const MainMenu =  require('./MainMenu')
+const Battle =    require('./battle/Battle')
 
 module.exports = class GameElement extends FocusElement {
   // The game's main element control class. It also handles all interaction
@@ -23,12 +24,15 @@ module.exports = class GameElement extends FocusElement {
     this.home.visible = false
     this.addChild(this.home)
 
+    this.battle = null
+
     this.initEventListeners()
   }
 
   initEventListeners() {
     this.mainMenu.on('loggedin', user => this.loggedInAs(user))
     this.home.on('saverequested', () => this.saveRequested())
+    this.home.on('battlerequested', dunCls => this.battleRequested(dunCls))
   }
 
   fixLayout() {
@@ -80,6 +84,20 @@ module.exports = class GameElement extends FocusElement {
     this.flushable.target.write('Goodbye!')
     this.flushable.target.write(ansi.moveCursor(1, 0))
     this.flushable.target.end()
+  }
+
+  battleRequested(dunCls) {
+    this.home.visible = false
+
+    if (this.battle) {
+      this.removeChild(this.battle)
+    }
+
+    this.battle = new Battle(dunCls, this)
+    this.addChild(this.battle)
+    this.battle.fixLayout()
+
+    this.root.select(this.battle)
   }
 
   saveUser() {

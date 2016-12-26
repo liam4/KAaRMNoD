@@ -15,7 +15,8 @@ const SellDialog =    require('./dialogs/SellDialog')
 const BuyDialog =     require('./dialogs/BuyDialog')
 const DungeonDialog = require('./dialogs/DungeonDialog')
 
-const MoneyBuilding =   require('../buildings/MoneyBuilding')
+const MoneyBuilding = require('../buildings/MoneyBuilding')
+const RelicRuins =    require('../dungeons/RelicRuins')
 
 module.exports = class Home extends FocusElement {
   constructor(user) {
@@ -34,14 +35,7 @@ module.exports = class Home extends FocusElement {
     ]
 
     this.dungeons = {
-      1: {
-        title: 'Relic Ruins',
-        description: (
-          'The large remnants of an old temple, Relic Ruins is now' +
-          ' infested by countless monsters attracted to the treasures that' +
-          ' lay in the rubble.'
-        )
-      }
+      1: RelicRuins
     }
 
     this.kingdomBuildings = []
@@ -142,9 +136,11 @@ module.exports = class Home extends FocusElement {
   }
 
   keyPressed(keyBuf) {
-    if (keyBuf[0] === 0x13) {
+    if (keyBuf[0] === 0x13) { // ^S
       Pane.alert(this.root, 'Saving.')
       this.emit('saverequested')
+    } else if (keyBuf[0] === 0x02) { // ^B
+      this.startBattle(RelicRuins)
     }
   }
 
@@ -179,6 +175,10 @@ module.exports = class Home extends FocusElement {
 
       this.showDungeonDialog(1)
     }
+  }
+
+  startBattle(dungeonCls) {
+    this.emit('battlerequested', dungeonCls)
   }
 
   showDungeonDialog(id) {

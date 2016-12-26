@@ -19,7 +19,12 @@ const telchars = {
   // Use this for when you'd like to detect the user cancelling an action,
   // like the O button on your PlayStation controller, or the Escape key on
   // your keyboard.
-  isCancel: buf => telchars.isEscape(buf)
+  isCancel: buf => telchars.isEscape(buf),
+
+  isUp: buf => buf[0] === 0x1b && buf[2] === 0x41,
+  isDown: buf => buf[0] === 0x1b && buf[2] === 0x42,
+  isRight: buf => buf[0] === 0x1b && buf[2] === 0x43,
+  isLeft: buf => buf[0] === 0x1b && buf[2] === 0x44,
 }
 
 module.exports = telchars
