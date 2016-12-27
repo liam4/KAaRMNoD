@@ -16,6 +16,10 @@ module.exports = class Sprite extends DisplayElement {
   }
 
   drawTo(writable) {
+    if (this.textureAttributes) {
+      writable.write(ansi.setAttributes(this.textureAttributes))
+    }
+
     for (let y = 0; y < this.textureHeight; y++) {
       // Don't render above or below the parent's content area.
       if (this.y + y >= this.parent.contentH || this.y + y < 0) continue
@@ -31,6 +35,10 @@ module.exports = class Sprite extends DisplayElement {
 
       writable.write(ansi.moveCursor(this.absY + y, this.absX + start))
       writable.write(text)
+    }
+
+    if (this.textureAttributes) {
+      writable.write(ansi.resetAttributes())
     }
   }
 

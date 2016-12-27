@@ -93,9 +93,10 @@ module.exports = class GameElement extends FocusElement {
       this.removeChild(this.battle)
     }
 
-    this.battle = new Battle(dunCls, this)
+    this.battle = new Battle(dunCls, this.user)
     this.addChild(this.battle)
     this.battle.fixLayout()
+    this.battle.startWave(0)
 
     this.root.select(this.battle)
   }

@@ -37,10 +37,10 @@ module.exports = class MainMenu extends FocusElement {
     this.signupDialog.visible = false
     this.addChild(this.signupDialog)
 
-    // K&ARMNOD(O) - Knights & A Relatively Minimal Number of Dragons Online
+    // K&ARMNOD(O) - Knights & a Relatively Minimal Number of Dragons Online
     // "karm" "nod" "oh"
     this.titleLabel = new Label(
-      'Knights & A Relatively Minimal Number of Dragons')
+      'Knights & a Relatively Minimal Number of Dragons')
     this.titleLabel.textAttributes = [ansi.C_CYAN, ansi.A_BRIGHT]
     this.addChild(this.titleLabel)
 

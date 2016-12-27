@@ -2,6 +2,7 @@
   "main": "src/server.js",
   "dependencies": {
     "es6-promisify": "^5.0.0",
+    "iac": "^1.0.0",
     "nedb": "^1.8.0"
   }
 }

@@ -1,5 +1,9 @@
+const iac = require('iac')
+
 const ansi = require('../ansi')
+
 const DisplayElement = require('./DisplayElement')
+
 const FocusElement = require('./form/FocusElement')
 
 module.exports = class Root extends DisplayElement {

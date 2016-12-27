@@ -1,5 +1,7 @@
 const Dungeon = require('./Dungeon')
 
+const Goblin = require('../enemies/Goblin')
+
 module.exports = class RelicRuins extends Dungeon {
   static get title() { return (
     'Relic Ruins'
@@ -11,6 +13,8 @@ module.exports = class RelicRuins extends Dungeon {
   )}
 
   static get waves() {return [
-
+    [Goblin],
+    [Goblin],
+    [Goblin]
   ]}
 }

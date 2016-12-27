@@ -6,6 +6,9 @@ module.exports = class User {
     this.username = null
     this.kingdomBuildingDocs = []
     this.gold = 0
+    this.stats = {
+      maxHealth: 0
+    }
   }
 
   saveAll(obj) {
@@ -27,7 +30,10 @@ module.exports = class User {
     return {
       username: this.username,
       kingdomBuildings: kingdomBuildings.map(b => b.save()),
-      gold: this.gold
+      gold: this.gold,
+      stats: {
+        maxHealth: this.stats.maxHealth
+      }
     }
   }
 
@@ -47,6 +53,18 @@ module.exports = class User {
     this.dbUpdate({
       $set: {
         kingdomBuildings: buildings.map(b => b.save())
+      }
+    })
+  }
+
+  saveStats() {
+    // Saves the player stats (HP, attack, etc).
+
+    // TODO: Duplicate of code in save
+
+    this.dbUpdate({
+      $set: {
+        maxHealth: this.stats.maxHealth
       }
     })
   }

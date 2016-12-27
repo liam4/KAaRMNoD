@@ -75,6 +75,10 @@ foreach@^2.0.5:
   version "2.0.5"
   resolved "https://registry.yarnpkg.com/foreach/-/foreach-2.0.5.tgz#0bee005018aeb260d0a3af3ae658dd0136ec1b99"
 
+iac@^1.0.0:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/iac/-/iac-1.0.1.tgz#ce98d20e525a0a6d6550b77ba694faa897225337"
+
 immediate@~3.0.5:
   version "3.0.6"
   resolved "https://registry.yarnpkg.com/immediate/-/immediate-3.0.6.tgz#9db1dbd0faf8de6fbe0f5dd5e56bb606280de69b"
