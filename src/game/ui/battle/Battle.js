@@ -287,7 +287,7 @@ module.exports = class Battle extends FocusElement {
     this.enemies.splice(this.enemies.indexOf(enemy), 1)
 
     // Drops. TODO: Make this not random and actually with meaning..
-    for (let i = 0; i < Math.ceil(Math.random() * 3); i++) {
+    for (let i = 0; i < Math.ceil(Math.random() * 10); i++) {
       const drop = new EnemyDrop()
       drop.texture = ['G']
       drop.textureAttributes = [ansi.C_YELLOW]
