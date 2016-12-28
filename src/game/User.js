@@ -14,8 +14,6 @@ module.exports = class User {
   saveAll(obj) {
     const doc = this.save(obj)
 
-    // console.log('Save:', doc)
-
     this.dbUpdate(doc)
   }
 
@@ -73,6 +71,9 @@ module.exports = class User {
     this.username = doc.username || 'Unnamed'
     this.kingdomBuildingDocs = doc.kingdomBuildings || []
     this.gold = doc.gold || 0
+
+    const docStats = (doc.stats || {})
+    this.stats.maxHealth = docStats.maxHealth || 0
   }
 
   static fromDocument(doc, game) {

@@ -4,7 +4,7 @@ const net = require('net')
 process.on('unhandledRejection', err => { throw err })
 
 require('./game/gameInit')({
-  dbPath: __dirname + '/db'
+  dbPath: __dirname + '/../db'
 }).then(game => {
   const server = new net.Server(socket => game.handleConnection(socket))
 
