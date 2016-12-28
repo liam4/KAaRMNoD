@@ -13,8 +13,7 @@ module.exports = class RelicRuins extends Dungeon {
   )}
 
   static get waves() {return [
-    [Goblin],
-    [Goblin],
+    [Goblin, Goblin, Goblin, Goblin],
     [Goblin]
   ]}
 }

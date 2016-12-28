@@ -10,6 +10,7 @@ const Pane = require('../../../lib/ui/Pane')
 const Sprite = require('../../../lib/ui/Sprite')
 const BattleBackdrop = require('./BattleBackdrop')
 const Player = require('../../enemies/Player')
+const EnemyDrop = require('./EnemyDrop')
 
 module.exports = class Battle extends FocusElement {
   constructor(dungeonCls, user) {
@@ -35,8 +36,6 @@ module.exports = class Battle extends FocusElement {
     ]
     this.pane.addChild(this.player.sprite)
 
-    this.enemies = []
-
     this.titleLabel = new Label(dungeonCls.title)
     this.titleLabel.textAttributes = [ansi.A_BRIGHT, ansi.C_RED]
     this.addChild(this.titleLabel)
@@ -52,12 +51,27 @@ module.exports = class Battle extends FocusElement {
     this.specialLabel.textAttributes = [ansi.C_WHITE, ansi.A_DIM]
     this.addChild(this.specialLabel)
 
+    // Whether or not the player will use a special attack when they get a
+    // turn.
     this.playerWillSpecial = false
 
+    // What team last attacked. Either 'player' or 'enemy'.
     this.lastTurn = 'player'
+
+    // The character that is currently attacking another character, and the
+    // target of that character.
     this.attacker = null
     this.attackerTarget = null
+
+    // General animation stuff.
     this.anim = {status: 'idle'}
+
+    // The enemies of the player in the battle. These are of the Character
+    // class, and they're also usually instances of Enemy.
+    this.enemies = []
+
+    // The items that enemies drop when they're defeated. These are Sprites.
+    this.enemyDropSprites = []
   }
 
   drawTo(writable) {
@@ -271,6 +285,20 @@ module.exports = class Battle extends FocusElement {
     enemy.health = 0
     this.pane.removeChild(enemy.sprite)
     this.enemies.splice(this.enemies.indexOf(enemy), 1)
+
+    // Drops. TODO: Make this not random and actually with meaning..
+    for (let i = 0; i < Math.ceil(Math.random() * 3); i++) {
+      const drop = new EnemyDrop()
+      drop.texture = ['G']
+      drop.textureAttributes = [ansi.C_YELLOW]
+      drop.x = enemy.sprite.x
+      drop.y = enemy.sprite.y
+      drop.on('removerequested', () => {
+        this.pane.removeChild(drop)
+      })
+      this.pane.addChild(drop)
+      this.enemyDropSprites.push(drop)
+    }
 
     if (this.enemies.length === 0) {
       if (this.currentWaveNum < this.dungeonCls.waves.length - 1) {
