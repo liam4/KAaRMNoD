@@ -30,6 +30,15 @@ module.exports = class Flushable {
       return
     }
 
+    // End if the target is destroyed.
+    // Yes, this relies on the target having a destroyed property
+    // Don't worry, it'll still work if there is no destroyed property though
+    // (I think)
+    if (this.target.destroyed) {
+      this.end()
+      return
+    }
+
     let toWrite = this.chunks.join('')
 
     if (this.shouldCompress) {
