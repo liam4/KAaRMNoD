@@ -19,8 +19,6 @@ module.exports = class Game {
   }
 
   handleConnection(socket) {
-    console.log('Connection gotten.')
-
     const flushable = new Flushable(socket, true)
 
     flushable.write(ansi.clearScreen())

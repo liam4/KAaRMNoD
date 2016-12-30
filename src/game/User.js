@@ -5,34 +5,28 @@ module.exports = class User {
     this.game = game
     this.username = null
     this.kingdomBuildingDocs = []
+    this.kingdomBuildings = []
     this.gold = 0
     this.stats = {
       maxHealth: 0
     }
+
+    this.items = {}
   }
 
-  saveAll(obj) {
-    const doc = this.save(obj)
-
-    this.dbUpdate(doc)
+  getItem(itemCls) {
+    this.items[itemCls.title] = (this.items[itemCls.title] || 0) + 1
   }
 
   dbUpdate(doc) {
     this.game.dbUpdate(this.game.userDB, {username: this.username}, doc)
   }
 
-  save({kingdomBuildings = []} = {}) {
-    // Use saveAll to write to the database! This just generates the object
-    // that would be written to the database.
-
-    return {
-      username: this.username,
-      kingdomBuildings: kingdomBuildings.map(b => b.save()),
-      gold: this.gold,
-      stats: {
-        maxHealth: this.stats.maxHealth
-      }
-    }
+  saveAll() {
+    this.saveGold()
+    this.saveBuildings()
+    this.saveStats()
+    this.saveItems()
   }
 
   saveGold() {
@@ -45,12 +39,12 @@ module.exports = class User {
     })
   }
 
-  saveBuildings(buildings) {
-    // TODO: Duplicate of code in save
+  saveBuildings() {
+    // Saves the buildings the player has placed in the kingdom.
 
     this.dbUpdate({
       $set: {
-        kingdomBuildings: buildings.map(b => b.save())
+        kingdomBuildings: this.kingdomBuildings.map(b => b.save())
       }
     })
   }
@@ -58,11 +52,19 @@ module.exports = class User {
   saveStats() {
     // Saves the player stats (HP, attack, etc).
 
-    // TODO: Duplicate of code in save
-
     this.dbUpdate({
       $set: {
         maxHealth: this.stats.maxHealth
+      }
+    })
+  }
+
+  saveItems() {
+    // Saves the player's items.
+
+    this.dbUpdate({
+      $set: {
+        items: this.items
       }
     })
   }
@@ -74,6 +76,8 @@ module.exports = class User {
 
     const docStats = (doc.stats || {})
     this.stats.maxHealth = docStats.maxHealth || 0
+
+    this.items = doc.items || {}
   }
 
   static fromDocument(doc, game) {

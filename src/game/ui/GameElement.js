@@ -55,6 +55,11 @@ module.exports = class GameElement extends FocusElement {
     this.home.visible = true
     this.root.select(this.home)
 
+    console.log(
+      'The user ' + ansi.setAttributes([ansi.A_BRIGHT, ansi.C_CYAN]) +
+      user.username + ansi.setAttributes([ansi.A_RESET]) + ' logged in!'
+    )
+
     this.home.loadUser(user)
   }
 
@@ -67,7 +72,7 @@ module.exports = class GameElement extends FocusElement {
   saveRequested() {
     // Called in Home when the combo ^S is pressed.
 
-    this.saveUser()
+    this.user.saveAll()
   }
 
   quitRequested() {
@@ -75,7 +80,7 @@ module.exports = class GameElement extends FocusElement {
     // pressed.
 
     if (this.user) {
-      this.saveUser()
+      this.user.saveAll()
     }
 
     this.root.cleanTelnetOptions()
@@ -99,11 +104,5 @@ module.exports = class GameElement extends FocusElement {
     this.battle.startWave(0)
 
     this.root.select(this.battle)
-  }
-
-  saveUser() {
-    this.user.saveAll({
-      kingdomBuildings: this.home.kingdomBuildings
-    })
   }
 }

@@ -1,16 +1,17 @@
-const ansi = require('../../../lib/ansi')
-const telc = require('../../../lib/telchars')
+const ansi =     require('../../../lib/ansi')
+const telc =     require('../../../lib/telchars')
 const smoothen = require('../../../lib/util/smoothen')
+const count =    require('../../../lib/util/count')
 
 const FocusElement = require('../../../lib/ui/form/FocusElement')
 
 const DisplayElement = require('../../../lib/ui/DisplayElement')
-const Label = require('../../../lib/ui/Label')
-const Pane = require('../../../lib/ui/Pane')
-const Sprite = require('../../../lib/ui/Sprite')
+const Label =          require('../../../lib/ui/Label')
+const Pane =           require('../../../lib/ui/Pane')
+const Sprite =         require('../../../lib/ui/Sprite')
 const BattleBackdrop = require('./BattleBackdrop')
-const Player = require('../../enemies/Player')
-const EnemyDrop = require('./EnemyDrop')
+const Player =         require('../../enemies/Player')
+const EnemyDrop =      require('./EnemyDrop')
 
 module.exports = class Battle extends FocusElement {
   constructor(dungeonCls, user) {
@@ -54,6 +55,12 @@ module.exports = class Battle extends FocusElement {
     this.specialLabel = new Label('[S]pecial')
     this.specialLabel.textAttributes = [ansi.C_WHITE, ansi.A_DIM]
     this.addChild(this.specialLabel)
+
+    // This gets filled in with status text, e.g. 'got 30 gold', 'paralyzed'
+    this.updateLabel = new Label()
+    this.addChild(this.updateLabel)
+
+    this._statusTimeout = null
 
     // Whether or not the player will use a special attack when they get a
     // turn.
@@ -253,6 +260,9 @@ module.exports = class Battle extends FocusElement {
 
     this.specialLabel.x = this.healthLabel.x
     this.specialLabel.y = this.healthLabel.y + 1
+
+    this.updateLabel.x = this.specialLabel.x
+    this.updateLabel.y = this.specialLabel.y + 1
   }
 
   keyPressed(keyBuf) {
@@ -295,24 +305,55 @@ module.exports = class Battle extends FocusElement {
     }
   }
 
+  initializeDrop(drop, enemy) {
+    drop.x = enemy.sprite.x
+    drop.y = enemy.sprite.y
+    drop.on('removerequested', () => {
+      this.pane.removeChild(drop)
+    })
+    this.pane.addChild(drop)
+    this.enemyDropSprites.push(drop)
+  }
+
   killEnemy(enemy) {
     enemy.health = 0
     this.pane.removeChild(enemy.sprite)
     this.enemies.splice(this.enemies.indexOf(enemy), 1)
 
-    // Drops. TODO: Make this not random and actually with meaning..
-    for (let i = 0; i < Math.ceil(Math.random() * 10); i++) {
+    const drops = enemy.drops
+    const goldDropped = (drops.gold || 0)
+    const itemsDropped = enemy.generateDropItems()
+
+    // Create gold drop sprites.
+    for (let i = 0; i < Math.ceil(goldDropped / 50); i++) {
       const drop = new EnemyDrop()
       drop.texture = ['G']
       drop.textureAttributes = [ansi.C_YELLOW]
-      drop.x = enemy.sprite.x
-      drop.y = enemy.sprite.y
-      drop.on('removerequested', () => {
-        this.pane.removeChild(drop)
-      })
-      this.pane.addChild(drop)
-      this.enemyDropSprites.push(drop)
+      this.initializeDrop(drop, enemy)
     }
+
+    // Create item drop sprites.
+    for (let i = 0; i < itemsDropped.length; i++) {
+      const drop = new EnemyDrop()
+      drop.texture = ['I']
+      drop.textureAttributes = [ansi.C_CYAN]
+      this.initializeDrop(drop, enemy)
+    }
+
+    // Add the drops to the user object.
+    this.user.gold += goldDropped
+    for (let item of itemsDropped) {
+      this.user.getItem(item)
+    }
+    this.user.saveGold()
+    this.user.saveItems()
+
+    // Display the drop text.
+    let statusText = `Defeated ${enemy.title}! +${goldDropped}G`
+    for (let [cls, n] of count(itemsDropped)) {
+      statusText += ` +${n} ${cls.title}`
+    }
+    this.status(statusText)
 
     if (this.enemies.length === 0) {
       if (this.currentWaveNum < this.dungeonCls.waves.length - 1) {
@@ -360,6 +401,21 @@ module.exports = class Battle extends FocusElement {
     } else {
       return x + (this.players.length - i - 1) * 7
     }
+  }
+
+  status(text) {
+    // Displays status text. Clears the text after a second has passed.
+
+    this.updateLabel.text = text
+
+    if (this._statusTimeout !== null) {
+      clearTimeout(this._statusTimeout)
+    }
+
+    this._statusTimeout = setTimeout(() => {
+      this.updateLabel.text = ''
+      this._statusTimeout = null
+    }, 1000)
   }
 
   resetAttackerVars() {

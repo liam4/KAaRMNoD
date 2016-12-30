@@ -130,6 +130,9 @@ module.exports = class Home extends FocusElement {
       return bObj
     }).filter(x => (x !== null))
 
+    // Link the user's kingdomBuildings property to the array here. Handy.
+    this.user.kingdomBuildings = this.kingdomBuildings
+
     this.buildWorldMapTiles()
   }
 
