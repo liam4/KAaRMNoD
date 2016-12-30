@@ -13,9 +13,11 @@ const Shop =          require('./Shop')
 const CancelDialog =  require('../../lib/ui/form/CancelDialog')
 const SellDialog =    require('./dialogs/SellDialog')
 const BuyDialog =     require('./dialogs/BuyDialog')
+const ForgeryDialog = require('./dialogs/ForgeryDialog')
 const DungeonDialog = require('./dialogs/DungeonDialog')
 
 const MoneyBuilding = require('../buildings/MoneyBuilding')
+const Forgery =       require('../buildings/Forgery')
 const RelicRuins =    require('../dungeons/RelicRuins')
 
 module.exports = class Home extends FocusElement {
@@ -379,15 +381,9 @@ module.exports = class Home extends FocusElement {
   buildingToolsUsePressed() {
     const { building } = this.buildingTools
 
-    if (building instanceof MoneyBuilding) {
-      const val = building.collectMoney()
-      this.user.gold += val
-
-      Pane.alert(this.root, `Collected ${val} gold!`)
-      this.user.saveGold()
-    }
-
     this.closeBuildingTools()
+
+    building.use()
   }
 
   buildingToolsMovePressed() {
@@ -511,6 +507,8 @@ module.exports = class Home extends FocusElement {
         bObj.y = y
         this.kingdomBuildings.push(bObj)
         this.worldMap.setTileAt(x, y, bObj)
+
+        this.initBuilding(bObj)
       } else {
         console.warn('Invalid building type from shop: ' + item.title)
       }
@@ -533,9 +531,36 @@ module.exports = class Home extends FocusElement {
 
   makeBuildingFromTitle(title) {
     // Make a completely new building using the correct class, given a type.
-    // If there is no class for the given type, null is returned.
+    // If there is no class for the given type, null is returned. Initializes
+    // the building.
 
     const cls = buildingClasses.fromTitle(title)
-    return cls ? (new cls()) : null
+    return cls ? this.initBuilding(new cls()) : null
+  }
+
+  initBuilding(building) {
+    if (building instanceof MoneyBuilding) {
+      building.on('collected', val => {
+        this.user.gold += val
+        this.user.saveGold()
+
+        Pane.alert(this.root, `Collected ${val} gold!`)
+      })
+    } else if (building instanceof Forgery) {
+      building.on('forgeryrequested', () => this.showForgery())
+    }
+
+    return building
+  }
+
+  showForgery() {
+    const dialog = new ForgeryDialog()
+    this.worldMapPane.addChild(dialog)
+    this.root.select(dialog)
+
+    dialog.on('cancelled', () => {
+      this.worldMapPane.removeChild(dialog)
+      this.root.select(this.worldMap)
+    })
   }
 }

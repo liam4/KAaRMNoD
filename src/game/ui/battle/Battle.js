@@ -28,13 +28,17 @@ module.exports = class Battle extends FocusElement {
     this.backdrop = new BattleBackdrop()
     this.pane.addChild(this.backdrop)
 
-    this.player = new Player(user)
-    this.player.sprite.texture = [
-      'aAAAa',
-      'bBBBb',
-      'cCCCc'
-    ]
-    this.pane.addChild(this.player.sprite)
+    this.players = []
+    for (let i = 0; i < 3; i++) {
+      const player = new Player(user)
+      player.sprite.texture = [
+        'aAAAa',
+        `bB${i + 1}Bb`,
+        'cCCCc'
+      ]
+      this.pane.addChild(player.sprite)
+      this.players.push(player)
+    }
 
     this.titleLabel = new Label(dungeonCls.title)
     this.titleLabel.textAttributes = [ansi.A_BRIGHT, ansi.C_RED]
@@ -74,6 +78,8 @@ module.exports = class Battle extends FocusElement {
     this.enemyDropSprites = []
   }
 
+  get currentWave() { return this.dungeonCls.waves[this.currentWaveNum] }
+
   drawTo(writable) {
     const wnum = this.currentWaveNum
 
@@ -81,17 +87,26 @@ module.exports = class Battle extends FocusElement {
     const targetPc = (100 / (this.dungeonCls.waves.length - 1)) * wnum
     this.backdrop.smoothlyScrollToPercent(targetPc, 3)
 
-    this.player.sprite.y = 8
+    // Line up all of the players except for the first, which may be
+    // animated.
+    for (let player of this.players.slice(1)) {
+      const targetX = this.playerIdlePos(player)
+      player.sprite.x = smoothen(targetX, player.sprite.x, 3)
+      player.sprite.y = 8
+    }
 
-    // Line up all of the eneies except for the first, which may be animated.
+    // Line up all of the enemies except for the first, which may be
+    // animated.
     for (let enemy of this.enemies.slice(1)) {
       const targetX = this.enemyIdlePos(enemy)
       enemy.sprite.x = smoothen(targetX, enemy.sprite.x, 3)
       enemy.sprite.y = 8
     }
 
-    // Front enemy animation
     const frontEnemy = this.enemies[0]
+    const frontPlayer = this.players[0]
+
+    // Front enemy animation
     if (frontEnemy) {
       const { sprite } = frontEnemy
 
@@ -100,7 +115,8 @@ module.exports = class Battle extends FocusElement {
         this.anim.status === 'enemy going to player' ||
         this.anim.status === 'enemy waiting for player hurt'
       ) {
-        targetX = this.player.sprite.x + this.player.sprite.textureWidth + 2
+        const targetSprite = this.attackerTarget.sprite
+        targetX = targetSprite.x + targetSprite.textureWidth + 2
 
         if (this.anim.status === 'enemy going to player') speed = 2
       } else {
@@ -119,13 +135,13 @@ module.exports = class Battle extends FocusElement {
       }
 
       if (this.anim.status === 'enemy waiting for player hurt') {
-        this.player.sprite.textureAttributes = [ansi.C_RED]
+        frontPlayer.sprite.textureAttributes = [ansi.C_RED]
         this.anim.ticks--
 
         if (this.anim.ticks === 0) {
-          this.player.sprite.textureAttributes = []
+          frontPlayer.sprite.textureAttributes = []
           this.anim.status = 'enemy going back to idle'
-          this.characterAttackedBy(this.player, frontEnemy)
+          this.characterAttackedBy(frontPlayer, frontEnemy)
         }
       } else if (
         this.anim.status === 'enemy going back to idle' &&
@@ -139,9 +155,9 @@ module.exports = class Battle extends FocusElement {
 
     }
 
-    // Player animation, along with unnecessary if-this.player
-    if (this.player) {
-      const { sprite } = this.player
+    // Front player animation
+    if (frontPlayer) {
+      const { sprite } = frontPlayer
 
       let targetX, speed = 3
       if ((
@@ -151,10 +167,11 @@ module.exports = class Battle extends FocusElement {
         targetX = frontEnemy.sprite.x - sprite.textureWidth - 2
         speed = 2
       } else {
-        targetX = this.playerIdlePos(0)
+        targetX = this.playerIdlePos(frontPlayer)
       }
 
       sprite.x = smoothen(targetX, sprite.x, speed)
+      sprite.y = 8
 
       if (
         this.anim.status === 'player going to enemy' &&
@@ -174,7 +191,7 @@ module.exports = class Battle extends FocusElement {
         if (this.anim.ticks === 0) {
           if (frontEnemy) {
             frontEnemy.sprite.textureAttributes = []
-            this.characterAttackedBy(frontEnemy, this.player)
+            this.characterAttackedBy(frontEnemy, frontPlayer)
           }
 
           this.anim.status = 'player going back to idle'
@@ -189,26 +206,27 @@ module.exports = class Battle extends FocusElement {
         this.anim.status = 'idle'
         this.lastTurn = 'player'
       }
-    }
 
-    if (this.anim.status === 'idle') {
-      if (this.lastTurn === 'player') {
-        this.anim.status = 'enemy going to player'
-        this.attacker = frontEnemy
-        this.attackerTarget = this.player
-      } else if (this.lastTurn === 'enemy') {
-        this.anim.status = 'player going to enemy'
-        this.attacker = this.player
-        this.attackerTarget = frontEnemy
+      // Player-related label texts
+      this.healthValueLabel.text = frontPlayer.health
 
-        // Since the player is now attacking, we can't change what we want
-        // the player to do, so dim those controls.
-        this.specialLabel.textAttributes.push(ansi.A_DIM)
+      // We shouldn't do any battle turns if there aren't any players alive!
+      if (this.anim.status === 'idle') {
+        if (this.lastTurn === 'player') {
+          this.anim.status = 'enemy going to player'
+          this.attacker = frontEnemy
+          this.attackerTarget = frontPlayer
+        } else if (this.lastTurn === 'enemy') {
+          this.anim.status = 'player going to enemy'
+          this.attacker = frontPlayer
+          this.attackerTarget = frontEnemy
+
+          // Since the player is now attacking, we can't change what we want
+          // the player to do, so dim those controls.
+          this.specialLabel.textAttributes.push(ansi.A_DIM)
+        }
       }
     }
-
-    // Label texts
-    this.healthValueLabel.text = this.player.health
 
     super.drawTo(writable)
   }
@@ -238,13 +256,9 @@ module.exports = class Battle extends FocusElement {
   }
 
   keyPressed(keyBuf) {
-    if (telc.isSelect(keyBuf)) {
-      this.startWave(this.currentWaveNum + 1)
-    }
-
     // We can only decide on a new thing to do if the player isn't already
     // attacking.
-    if (this.attacker !== this.player) {
+    if (this.attacker !== this.players[0]) {
       if (keyBuf[0] === 0x73) { // S-pecial
         this.specialLabel.textAttributes = [ansi.A_BRIGHT, ansi.C_YELLOW]
         this.willSpecial = true
@@ -257,7 +271,6 @@ module.exports = class Battle extends FocusElement {
 
   startWave(n) {
     this.currentWaveNum = n
-    const wave = this.dungeonCls.waves[this.currentWaveNum]
 
     for (let sprite of this.enemies) {
       this.pane.removeChild(sprite)
@@ -265,6 +278,7 @@ module.exports = class Battle extends FocusElement {
 
     this.enemies.splice(0)
 
+    const wave = this.currentWave
     if (!wave) return
 
     for (let enemyCls of wave) {
@@ -310,26 +324,41 @@ module.exports = class Battle extends FocusElement {
     }
   }
 
+  killPlayer(player) {
+    player.health = 0
+    this.pane.removeChild(player.sprite)
+    this.players.splice(this.players.indexOf(player), 1)
+
+    if (this.players.length === 0) {
+      Pane.alert(this.root, 'You were defeated...')
+      this.anim.status = 'player lost'
+    }
+  }
+
   enemyIdlePos(enemy) {
     const i = this.enemies.indexOf(enemy)
 
     if (i === 0) {
-      return this.pane.contentW - ((this.enemies.length) * 6 + 5)
+      return this.pane.contentW - ((this.enemies.length) * 5 + 1)
     } else {
-      return this.pane.contentW - (this.enemies.length - i) * 6
+      return this.pane.contentW - (this.enemies.length - i) * 5
     }
   }
 
   playerIdlePos(player) {
     // TODO
 
-    const i = 0
+    const i = this.players.indexOf(player)
+
+    let x = Math.round(
+      (this.pane.contentW / 4 - 7)
+      / (this.dungeonCls.waves.length - 1) * this.currentWaveNum
+    )
 
     if (i === 0) {
-      return Math.round(
-        (this.pane.contentW / 4 - this.player.sprite.textureWidth)
-        / (this.dungeonCls.waves.length - 1) * this.currentWaveNum
-      )
+      return x + (this.players.length - 1) * 7 + 1
+    } else {
+      return x + (this.players.length - i - 1) * 7
     }
   }
 
@@ -353,9 +382,11 @@ module.exports = class Battle extends FocusElement {
 
     target.health -= damage
 
-    if (this.enemies.includes(target)) {
-      if (target.health <= 0) {
+    if (target.health <= 0) {
+      if (this.enemies.includes(target)) {
         this.killEnemy(target)
+      } else if (this.players.includes(target)) {
+        this.killPlayer(target)
       }
     }
   }

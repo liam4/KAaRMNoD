@@ -1,8 +1,12 @@
-module.exports = class Building {
+const EventEmitter = require('events')
+
+module.exports = class Building extends EventEmitter {
   // The class used to represent a kingdom building. This can be used as a
   // tile in WorldMap.
 
   constructor() {
+    super()
+
     this.x = null
     this.y = null
     this.textureAttributes = []
@@ -31,6 +35,11 @@ module.exports = class Building {
     }
 
     return Math.floor(this.price / 2)
+  }
+
+  use() {
+    // Called when the building is used by the user (when the 'use' button
+    // is pressed in the building tools). Override this in subclasses.
   }
 
   load(doc) {

@@ -26,6 +26,11 @@ module.exports = class MoneyBuilding extends Building {
   get moneyCap() { return this.constructor.moneyCap }
   get moneyPerSecond() { return this.constructor.moneyPerSecond }
 
+  use() {
+    const val = this.collectMoney()
+    this.emit('collected', val)
+  }
+
   load(doc) {
     super.load(doc)
 

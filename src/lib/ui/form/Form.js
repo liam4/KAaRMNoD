@@ -34,7 +34,7 @@ module.exports = class Form extends FocusElement {
       } else {
         this.curIndex = (this.curIndex - 1)
         if (this.curIndex < 0) {
-          this.curIndex = this.inputs.length
+          this.curIndex = (this.inputs.length - 1)
         }
       }
 

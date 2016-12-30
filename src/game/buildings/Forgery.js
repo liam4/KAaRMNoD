@@ -19,4 +19,8 @@ module.exports = class Forgery extends Building {
       '└────────┘'
     ]
   }
+
+  use() {
+    this.emit('forgeryrequested')
+  }
 }

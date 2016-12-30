@@ -1,3 +1,5 @@
+// TODO: Make this a dialog.
+
 const telc = require('../../lib/telchars')
 const buildingClasses = require('../buildings/buildingClasses')
 
