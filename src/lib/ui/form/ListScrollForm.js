@@ -13,26 +13,6 @@ module.exports = class ListScrollForm extends Form {
   }
 
   fixLayout() {
-    let sizeProp
-    let posProp
-
-    if (this.layoutType === 'vertical') {
-      // If this is a vertical scroll, we want to measure the height of
-      // elements and position them along the Y axis..
-      sizeProp = 'h'
-      posProp = 'y'
-    } else if (this.layoutType === 'horizontal') {
-      // Or if this is a horizontal scroll, we use the width and X axis
-      // instead..
-      sizeProp = 'w'
-      posProp = 'x'
-    } else {
-      // Or, if the layout type isn't vertical or horizontal, this doesn't make
-      // sense!
-      throw new Error(
-        `Invalid ListScrollForm layout type: ${this.layoutType}`)
-    }
-
     // The scrollItems property represents the item to the very left of where
     // we've scrolled, so we know right away that none of those will be
     // visible and we won't bother iterating over them.
@@ -43,25 +23,23 @@ module.exports = class ListScrollForm extends Form {
     let nextPos = 0
 
     for (let item of itemsPastScroll) {
-      item[posProp] = nextPos
-      nextPos += item[sizeProp]
+      item[this.posProp] = nextPos
+      nextPos += item[this.sizeProp]
 
       // By default, the item should be visible..
       item.visible = true
 
-      // ..but the item's right edge is past the form's right edge, it isn't
+      // ..but the item's far edge is past the form's far edge, it isn't
       // fully visible and should be hidden.
-      if (item.right > this.contentW) {
+      if (item[this.posProp] + item[this.sizeProp] > this.formEdge) {
         item.visible = false
       }
 
-      // Same deal goes for the left edge. We can check it against 0 since
-      // the left edge of the form's content is going to be 0, of course!
-      if (item.left < 0) {
+      // Same deal goes for the close edge. We can check it against 0 since
+      // the close edge of the form's content is going to be 0, of course!
+      if (item[this.posProp] < 0) {
         item.visible = false
       }
-
-      // console.log(this.inputs.indexOf(item), item.visible)
     }
   }
 
@@ -116,6 +94,16 @@ module.exports = class ListScrollForm extends Form {
       this.layoutType === 'vertical' ? 'h' :
       null
     )
+  }
+
+  get posProp() {
+    // The property used to position an item. Like sizeProp, returns null if
+    // the layoutType isn't valid.
+
+    return (
+      this.layoutType === 'horizontal' ? 'x' :
+      this.layoutType === 'vertical' ? 'y' :
+      null)
   }
 
   get edgeProp() {
