@@ -1,10 +1,10 @@
 const Character = require('./Character')
 
 module.exports = class Player extends Character {
-  constructor(user) {
+  constructor(knight) {
     super(false)
 
-    this.user = user
+    this.knight = knight
     this.initStats()
   }
 
@@ -13,10 +13,10 @@ module.exports = class Player extends Character {
   static get attack() { return 90909 }
 
   get maxHealth() {
-    return this.user.stats.maxHealth || this.constructor.maxHealth
+    return this.knight.stats.maxHealth || 0
   }
 
   get attack() {
-    return this.user.stats.attack || this.constructor.attack
+    return this.knight.stats.attack || 0
   }
 }

@@ -1,3 +1,5 @@
+const Knight = require('./Knight')
+
 module.exports = class User {
   // The basic user class.
 
@@ -7,9 +9,8 @@ module.exports = class User {
     this.kingdomBuildingDocs = []
     this.kingdomBuildings = []
     this.gold = 0
-    this.stats = {
-      maxHealth: 0
-    }
+
+    this.knights = []
 
     this.items = {}
   }
@@ -25,7 +26,6 @@ module.exports = class User {
   saveAll() {
     this.saveGold()
     this.saveBuildings()
-    this.saveStats()
     this.saveItems()
   }
 
@@ -49,16 +49,6 @@ module.exports = class User {
     })
   }
 
-  saveStats() {
-    // Saves the player stats (HP, attack, etc).
-
-    this.dbUpdate({
-      $set: {
-        maxHealth: this.stats.maxHealth
-      }
-    })
-  }
-
   saveItems() {
     // Saves the player's items.
 
@@ -73,11 +63,13 @@ module.exports = class User {
     this.username = doc.username || 'Unnamed'
     this.kingdomBuildingDocs = doc.kingdomBuildings || []
     this.gold = doc.gold || 0
-
-    const docStats = (doc.stats || {})
-    this.stats.maxHealth = docStats.maxHealth || 0
-
     this.items = doc.items || {}
+
+    this.knights = (doc.knights || []).map(knightDoc => {
+      const knight = new Knight()
+      knight.load(knightDoc)
+      return knight
+    })
   }
 
   static fromDocument(doc, game) {

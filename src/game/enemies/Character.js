@@ -1,7 +1,7 @@
 const Sprite = require('../../lib/ui/Sprite')
 
 module.exports = class Character {
-  constructor(initStats) {
+  constructor(initStats = true) {
     if (initStats) {
       this.initStats()
     } else {

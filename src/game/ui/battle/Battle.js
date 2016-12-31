@@ -30,8 +30,8 @@ module.exports = class Battle extends FocusElement {
     this.pane.addChild(this.backdrop)
 
     this.players = []
-    for (let i = 0; i < 3; i++) {
-      const player = new Player(user)
+    for (let i = 0; i < user.knights.length; i++) {
+      const player = new Player(user.knights[i])
       player.sprite.texture = [
         'aAAAa',
         `bB${i + 1}Bb`,
