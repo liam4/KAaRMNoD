@@ -59,20 +59,29 @@ module.exports = class Game {
           return User.fromDocument(docs[0], this)
         }
 
-        throw exception('ENOUSERFOUND', `No user with name ${username} found`)
+        throw exception(
+          'ENOUSERFOUND', `No user with name ${username} found`)
       })
   }
 
   signup(username) {
-    // Sign up as the given username. Returns the new user object.
+    // Sign up as the given username. Returns the new user object. It'll
+    // throw an error if there's already a user with that username.
 
     let user
 
-    return this.dbInsert(this.userDB, {username: username}).then(() => {
-      user = User.createNew(username)
-      user.game = this
-      return user.saveAll()
-    }).then(() => user)
+    return this.dbFind(this.userDB, {username}).then((users) => {
+      if (users.length) {
+        throw exception(
+          'EUSERNAMEUNAVAILABLE', `Username ${username} is already taken`)
+      }
+    })
+      .then(() => this.dbInsert(this.userDB, {username}))
+      .then(() => {
+        user = User.createNew(username)
+        user.game = this
+        return user.saveAll()
+      }).then(() => user)
   }
 
   dbFind(db, ...args) {

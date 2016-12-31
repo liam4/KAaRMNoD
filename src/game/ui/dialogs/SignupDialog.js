@@ -32,13 +32,19 @@ module.exports = class SignupDialog extends FocusElement {
 
     this.signupStatus = new Label()
     this.form.addChild(this.signupStatus)
+
+    this.initEventListeners()
+  }
+
+  initEventListeners() {
+    this.signupButton.on('pressed', () => this.signupPressed())
   }
 
   fixLayout() {
     this.w = this.parent.contentW
     this.h = this.parent.contentH
 
-    this.pane.w = 30
+    this.pane.w = 40
     this.pane.h = 5
     this.pane.centerInParent()
 
@@ -57,8 +63,6 @@ module.exports = class SignupDialog extends FocusElement {
 
     this.signupStatus.x = this.signupButton.text.length + 1
     this.signupStatus.y = this.signupButton.y
-
-    this.signupButton.on('pressed', () => this.signupPressed())
   }
 
   focus() {
@@ -69,11 +73,12 @@ module.exports = class SignupDialog extends FocusElement {
     this.game.signup(this.usernameInput.value)
       .then(user => {
         this.signupStatus.text = 'Signed up!'
-        this.signupStatus.textColor = ansi.C_GREEN
-        user.saveAll()
+        this.signupStatus.textAttributes = [ansi.C_GREEN]
       })
       .catch(err => {
-        console.log(err)
+        if (err.code === 'EUSERNAMEUNAVAILABLE')
+        this.signupStatus.text = 'That name is already taken!'
+        this.signupStatus.textAttributes = [ansi.C_RED]
       })
   }
 
