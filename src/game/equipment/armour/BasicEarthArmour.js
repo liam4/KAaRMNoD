@@ -1,11 +1,11 @@
 const Armour = require('./Armour')
 
-const Equippable = require('../Equippable')
+const { EARTH } = require('../../Element')
 
 module.exports = class BasicEarthArmour extends Armour {
   static get title() { return 'Basic Earth Armour' }
 
-  static get element() { return Equippable.ELEMENT_EARTH }
+  static get element() { return EARTH }
 
   static get statBoosts() {
     return {

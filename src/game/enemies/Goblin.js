@@ -5,7 +5,7 @@ const EarthShard = require('../items/EarthShard')
 module.exports = class Goblin extends Enemy {
   static get title() { return 'Goblin' }
   static get maxHealth() { return 12 }
-  static get attack() { return 30 }
+  static get attack() { return 4 }
 
   static get drops() {
     return {
