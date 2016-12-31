@@ -66,8 +66,13 @@ module.exports = class Game {
   signup(username) {
     // Sign up as the given username. Returns the new user object.
 
-    return this.dbInsert(this.userDB, {'username': String(username)})
-      .then(doc => User.fromDocument(doc, this))
+    let user
+
+    return this.dbInsert(this.userDB, {username: username}).then(() => {
+      user = User.createNew(username)
+      user.game = this
+      return user.saveAll()
+    }).then(() => user)
   }
 
   dbFind(db, ...args) {

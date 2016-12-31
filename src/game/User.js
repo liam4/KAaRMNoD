@@ -15,24 +15,47 @@ module.exports = class User {
     this.items = {}
   }
 
+  static createNew(username) {
+    const user = new User()
+
+    user.load({
+      username: username,
+      knights: [
+        {
+          name: username,
+          stats: {
+            maxHealth: 43,
+            attack: 17
+          }
+        }
+      ]
+    })
+
+    return user
+  }
+
   getItem(itemCls) {
     this.items[itemCls.title] = (this.items[itemCls.title] || 0) + 1
   }
 
   dbUpdate(doc) {
-    this.game.dbUpdate(this.game.userDB, {username: this.username}, doc)
+    return this.game.dbUpdate(
+      this.game.userDB, {username: this.username}, doc)
   }
 
   saveAll() {
-    this.saveGold()
-    this.saveBuildings()
-    this.saveItems()
+    return Promise.all([
+      this.saveGold(),
+      this.saveBuildings(),
+      this.saveItems(),
+      this.saveKnights()
+    ])
   }
 
   saveGold() {
     // Saves the amount of gold the user has in the user database.
 
-    this.dbUpdate({
+    return this.dbUpdate({
       $set: {
         gold: this.gold
       }
@@ -42,7 +65,7 @@ module.exports = class User {
   saveBuildings() {
     // Saves the buildings the player has placed in the kingdom.
 
-    this.dbUpdate({
+    return this.dbUpdate({
       $set: {
         kingdomBuildings: this.kingdomBuildings.map(b => b.save())
       }
@@ -52,9 +75,19 @@ module.exports = class User {
   saveItems() {
     // Saves the player's items.
 
-    this.dbUpdate({
+    return this.dbUpdate({
       $set: {
         items: this.items
+      }
+    })
+  }
+
+  saveKnights() {
+    // Saves the player's knights.
+
+    return this.dbUpdate({
+      $set: {
+        knights: this.knights.map(k => k.save())
       }
     })
   }
